@@ -7,7 +7,6 @@
 //
 
 #import "YLLoopScrollView.h"
-#import "UIImageView+WebCache.h"
 #import "YLLoopImageView.h"
 
 @interface YLLoopScrollView () <UIScrollViewDelegate>
@@ -120,12 +119,6 @@
     return self;
 }
 
-- (void)dealloc
-{
-    [self.timer invalidate];
-    self.timer = nil;
-}
-
 #pragma mark 初始化子控件
 - (void)initializeSubviews
 {
@@ -190,7 +183,6 @@
     
     _pageControl.frame = CGRectMake(0, height - 10, width, 10);
 }
-
 #pragma mark - 更改了pageControl的值
 - (void)pageControlValueChange:(UIPageControl *)pageControl
 {
@@ -243,7 +235,7 @@
     _pageControl.currentPageIndicatorTintColor = pageControlCurrentPageColor;
 }
 
-#pragma mark 设置定时器的时间间隔
+#pragma mark - 设置定时器的时间间隔
 - (void)setTimeInterval:(NSTimeInterval)timeInterval
 {
     _timeInterval = timeInterval <= 0.0 ? kDefaultTimeInterval : timeInterval;
@@ -272,7 +264,16 @@
     }
 }
 
-#pragma mark 轮播, 更新页面
+#pragma mark 从父控件移除后，销毁计时器
+- (void)removeFromSuperview
+{
+    [super removeFromSuperview];
+    
+    [self.timer invalidate];
+    self.timer = nil;
+}
+
+#pragma mark - 轮播, 更新页面
 - (void)updateCurrentPage
 {
     // 向右循环
@@ -319,19 +320,6 @@
 }
 
 #pragma mark - UIScrollview 代理方法
-#pragma mark 将要滑动
-- (void)scrollViewWillBeginDecelerating:(UIScrollView *)scrollView
-{
-    if(self.timer.valid)
-    {
-        [self pauseTimer];
-    }
-    
-    if([self.delegate respondsToSelector:@selector(loopScrollViewWillBeginScroll:)])
-    {
-        [self.delegate loopScrollViewWillBeginScroll:self];
-    }
-}
 #pragma mark 滑动过程中多次调用
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView
 {
@@ -341,12 +329,38 @@
         direction = YLLoopScrollViewScrollDirectionFromRightToLeft;
     }
     
-    if([self.delegate respondsToSelector:@selector(loopScrollViewDidScroll:scrollDirection:)])
+    if([self.delegate respondsToSelector:@selector(loopScrollViewDidScroll:scrollDirection:)] && _scrollView.contentOffset.x != self.frame.size.width)
     {
         [self.delegate loopScrollViewDidScroll:self scrollDirection:direction];
     }
 }
-#pragma mark 已经停止滑动
+#pragma mark 将要开始拖拽
+- (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView
+{
+    if(self.timer.valid)
+    {
+        [self pauseTimer];
+    }
+}
+#pragma mark 将要停止拖拽
+- (void)scrollViewWillEndDragging:(UIScrollView *)scrollView withVelocity:(CGPoint)velocity targetContentOffset:(inout CGPoint *)targetContentOffset
+{
+    
+}
+#pragma mark 停止拖拽
+- (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate
+{
+    
+}
+#pragma mark 停止拖拽，将要开始减速
+- (void)scrollViewWillBeginDecelerating:(UIScrollView *)scrollView
+{
+    if([self.delegate respondsToSelector:@selector(loopScrollViewWillBeginDecelerating:)])
+    {
+        [self.delegate loopScrollViewWillBeginDecelerating:self];
+    }
+}
+#pragma mark 已经停止减速
 - (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView
 {
     if(self.timer.valid)
@@ -407,9 +421,9 @@
         _scrollView.contentOffset = CGPointMake(width, 0);
         _pageControl.currentPage = self.currentIndex;
         
-        if([self.delegate respondsToSelector:@selector(loopScrollView:didEndScrollWithDirection: currentIndex:)])
+        if([self.delegate respondsToSelector:@selector(loopScrollView:didEndDeceleratingWithDirection: currentIndex:)])
         {
-            [self.delegate loopScrollView:self didEndScrollWithDirection:YLLoopScrollViewScrollDirectionFromLeftToRight currentIndex:self.currentIndex];
+            [self.delegate loopScrollView:self didEndDeceleratingWithDirection:YLLoopScrollViewScrollDirectionFromLeftToRight currentIndex:self.currentIndex];
         }
     }
     // 向左滑动
@@ -462,10 +476,16 @@
         _scrollView.contentOffset = CGPointMake(width, 0);
         _pageControl.currentPage = self.currentIndex;
         
-        if([self.delegate respondsToSelector:@selector(loopScrollView:didEndScrollWithDirection: currentIndex:)])
+        if([self.delegate respondsToSelector:@selector(loopScrollView:didEndDeceleratingWithDirection: currentIndex:)])
         {
-            [self.delegate loopScrollView:self didEndScrollWithDirection:YLLoopScrollViewScrollDirectionFromRightToLeft currentIndex:self.currentIndex];
+            [self.delegate loopScrollView:self didEndDeceleratingWithDirection:YLLoopScrollViewScrollDirectionFromRightToLeft currentIndex:self.currentIndex];
         }
     }
+}
+
+#pragma mark 停止带动画的滚动（setContentOffsize/scrollRectVisible:  animated: 结束时有效）在scrollViewDidEndDecelerating 后调用
+- (void)scrollViewDidEndScrollingAnimation:(UIScrollView *)scrollView
+{
+    
 }
 @end

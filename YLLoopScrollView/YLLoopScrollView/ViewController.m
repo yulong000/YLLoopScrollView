@@ -9,7 +9,7 @@
 #import "ViewController.h"
 #import "YLLoopScrollView.h"
 
-@interface ViewController ()
+@interface ViewController () <YLLoopScrollViewDelegate>
 
 @end
 
@@ -28,8 +28,6 @@
                      @"http://down.tutu001.com/d/file/20101129/2f5ca0f1c9b6d02ea87df74fcc_560.jpg"];
     
     YLLoopScrollView *scrollView2 = [[YLLoopScrollView alloc] initWithFrame:CGRectMake(20, 250, 300, 100) imageUrlsSource:arr placeholderImage:[UIImage imageNamed:@"1.jpg"]];
-//    YLLoopScrollView *scrollView2 = [[YLLoopScrollView alloc] initWithFrame:CGRectMake(20, 250, 300, 100) imageUrlsSource:arr placeholderImage:nil];
-    scrollView2.showPageControl = NO;
     scrollView2.imageViewClickBlock = ^(YLLoopImageView *imageView, NSInteger index){
       
         NSLog(@"url : %@, index : %ld", imageView.url, index);
@@ -43,15 +41,29 @@
     [scrollView3 startTimer];
     scrollView3.pageControlDefaultColor = [UIColor redColor];
     scrollView3.pageControlCurrentPageColor = [UIColor greenColor];
+    scrollView3.delegate = self;
     
     [self.view addSubview:scrollView1];
     [self.view addSubview:scrollView2];
     [self.view addSubview:scrollView3];
 }
 
-- (void)didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
+
+#pragma mark delegate
+
+- (void)loopScrollViewDidScroll:(YLLoopScrollView *)loopScrollView scrollDirection:(YLLoopScrollViewScrollDirection)scrollDirection
+{
+    NSLog(@"scrollDirection : %ld", scrollDirection);
 }
 
+
+- (void)loopScrollView:(YLLoopScrollView *)loopScrollView didEndDeceleratingWithDirection:(YLLoopScrollViewScrollDirection)scrollDirection currentIndex:(NSInteger)index
+{
+    NSLog(@"didEndDeceleratingWithDirection : %ld, current index : %ld", (long)scrollDirection, index);
+}
+
+- (void)loopScrollViewWillBeginDecelerating:(YLLoopScrollView *)loopScrollView
+{
+    NSLog(@"loopScrollViewWillBeginDecelerating");
+}
 @end

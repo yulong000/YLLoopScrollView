@@ -30,10 +30,6 @@ typedef void(^ImageViewClickBlock)(YLLoopImageView *imageView, NSInteger current
 @class YLLoopScrollView;
 @protocol YLLoopScrollViewDelegate <NSObject>
 @optional
-/**
- *  scroolView将要开始滑动
- */
-- (void)loopScrollViewWillBeginScroll:(YLLoopScrollView *)loopScrollView;
 
 /**
  *  scrollView正在滑动
@@ -41,11 +37,18 @@ typedef void(^ImageViewClickBlock)(YLLoopImageView *imageView, NSInteger current
  */
 - (void)loopScrollViewDidScroll:(YLLoopScrollView *)loopScrollView scrollDirection:(YLLoopScrollViewScrollDirection)scrollDirection;
 
+
+/**
+ *  scroolView 松开拖动的手指，将要开始减速
+ */
+- (void)loopScrollViewWillBeginDecelerating:(YLLoopScrollView *)loopScrollView;
+
+
 /**
  *  scrollView停止滑动
  *  @param scrollDirection 相对与初始位置的滑动方向
  */
-- (void)loopScrollView:(YLLoopScrollView *)loopScrollView didEndScrollWithDirection:(YLLoopScrollViewScrollDirection)scrollDirection currentIndex:(NSInteger)index;
+- (void)loopScrollView:(YLLoopScrollView *)loopScrollView didEndDeceleratingWithDirection:(YLLoopScrollViewScrollDirection)scrollDirection currentIndex:(NSInteger)index;
 
 @end
 
