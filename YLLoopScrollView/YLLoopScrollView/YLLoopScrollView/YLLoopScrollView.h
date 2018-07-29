@@ -7,123 +7,39 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "YLLoopImageView.h"
+@class YLLoopView;
 
-// 默认的定时器时间间隔
-#define kDefaultTimeInterval 3.0
+// 点击了customView返回当前点击的index
+typedef void (^YLLoopScrollViewClickedBlock)(NSInteger index);
+// 字典里 key 对应的是customView的 class名字(如:@"UIImageView"), value对应的是customView的model名字(如:@"image"), 通过重写setter方法更新显示customView
+typedef NSDictionary * (^YLLoopScrollViewSetupBlock)(void);
 
-//  YLLoopScrollView 的轮播方向
-typedef NS_ENUM(NSInteger, YLLoopScrollViewScrollDirection){
-    
-    YLLoopScrollViewScrollDirectionFromRightToLeft, // 从右向左滑动
-    YLLoopScrollViewScrollDirectionFromLeftToRight  // 从左向右滑动
-};
-
-
-/**
- *  点击了某个imageView的回掉
- *  @param currentIndex imageView的序号
- */
-typedef void(^ImageViewClickBlock)(YLLoopImageView *imageView, NSInteger currentIndex);
-
-
-@class YLLoopScrollView;
-@protocol YLLoopScrollViewDelegate <NSObject>
-@optional
-
-/**
- *  scrollView正在滑动
- *  @param scrollDirection 相对与初始位置的滑动方向
- */
-- (void)loopScrollViewDidScroll:(YLLoopScrollView *)loopScrollView scrollDirection:(YLLoopScrollViewScrollDirection)scrollDirection;
-
-
-/**
- *  scroolView 松开拖动的手指，将要开始减速
- */
-- (void)loopScrollViewWillBeginDecelerating:(YLLoopScrollView *)loopScrollView;
-
-
-/**
- *  scrollView停止滑动
- *  @param scrollDirection 相对与初始位置的滑动方向
- */
-- (void)loopScrollView:(YLLoopScrollView *)loopScrollView didEndDeceleratingWithDirection:(YLLoopScrollViewScrollDirection)scrollDirection currentIndex:(NSInteger)index;
-
-@end
-
+//--------------------------------  YLLoopScrollView  -------------------------------------------/
 
 @interface YLLoopScrollView : UIView
 
-/**
- *  数据源,存放本地图片, 或者图片的URL地址(NSString类型)
- */
-@property (nonatomic, strong, readonly) NSArray *dataSource;
+/**  点击回调, 返回点击的 index  */
+@property (nonatomic, copy)   YLLoopScrollViewClickedBlock clickedBlock;
+
+/**  数据源,对应customView的数据  */
+@property (nonatomic, strong) NSArray *dataSourceArr;
 
 /**
- *  点击了某个图片后的回掉
+ 构造方法
+
+ @param time 计时器时间间隔, time = 0 时不添加计时器
+ @param customView 设置自定义的view, 如果返回 nil, 则默认为 YLImageView, dataSourceArr 存放的是 url 的数组
  */
-@property (nonatomic, copy) ImageViewClickBlock imageViewClickBlock;
++ (instancetype)loopScrollViewWithTimer:(NSTimeInterval)time customView:(YLLoopScrollViewSetupBlock)setupBlock;
 
-/**
- *  代理
- */
-@property (nonatomic, weak) id <YLLoopScrollViewDelegate> delegate;
+@end
 
-
-/**
- *  轮播的间隔时间 , default = 3
- */
-@property (nonatomic, assign) NSTimeInterval timeInterval;
+//--------------------------------  YLLoopScrollView  -------------------------------------------/
 
 
-//-------------- pageControl 属性设置-----------------//
-
-/**
- *  是否显示pageControl  (default : YES)
- */
-@property (nonatomic, assign) BOOL showPageControl;
-
-/**
- *  pageControl 的 默认颜色
- */
-@property (nonatomic, strong) UIColor *pageControlDefaultColor;
-/**
- *  pageControl 的 当前选中的颜色
- */
-@property (nonatomic, strong) UIColor *pageControlCurrentPageColor;
-
-
-
-
-/**
- *  根据传入的本地图片,创建实例
- *
- *  @param frame     frame
- *  @param sourceArr 本地图片 name 的数组
- */
-- (instancetype)initWithFrame:(CGRect)frame localImagesSource:(NSArray *)sourceArr;
-
-/**
- *  根据传入的网络图片的URL地址(NSString), 创建实例
- *
- *  @param frame       frame
- *  @param sourceArr   url地址的数组
- *  @param holderImage 默认显示的图片
- */
-- (instancetype)initWithFrame:(CGRect)frame imageUrlsSource:(NSArray *)sourceArr placeholderImage:(UIImage *)holderImage;
-
-- (instancetype)initWithLocalImagesSource:(NSArray *)sourceArr;
-- (instancetype)initWithImageUrlsSource:(NSArray *)sourceArr placeholderImage:(UIImage *)holderImage;
-
-+ (instancetype)loopScrollViewWithFrame:(CGRect)frame localImagesSource:(NSArray *)sourceArr;
-+ (instancetype)loopScrollViewWithFrame:(CGRect)frame imageUrlsSource:(NSArray *)sourceArr placeholderImage:(UIImage *)holderImage;
-
-+ (instancetype)loopScrollViewWithLocalImagesSource:(NSArray *)sourceArr;
-+ (instancetype)loopScrollViewWithImageUrlsSource:(NSArray *)sourceArr placeholderImage:(UIImage *)holderImage;
-
-// 定时器
-- (void)startTimer;
-- (void)pauseTimer;
+// 举个栗子, dataSourceArr 里存放的是 url 的数组, setupBlock 返回的是 @{@"YLImageView" : @"url"}, 需要重写 url 的setter 方法
+@interface YLImageView : UIImageView
+/**  图片的网络地址  */
+@property (nonatomic, copy)   NSString *url;
 
 @end

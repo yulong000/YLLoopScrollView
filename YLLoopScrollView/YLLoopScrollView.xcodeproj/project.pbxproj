@@ -30,7 +30,6 @@
 		397E7B441BFC6DC200EA1D8D /* YLLoopScrollViewTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 397E7B431BFC6DC200EA1D8D /* YLLoopScrollViewTests.m */; };
 		397E7B4F1BFC6DC200EA1D8D /* YLLoopScrollViewUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 397E7B4E1BFC6DC200EA1D8D /* YLLoopScrollViewUITests.m */; };
 		397E7B621BFC6E3900EA1D8D /* YLLoopScrollView.m in Sources */ = {isa = PBXBuildFile; fileRef = 397E7B611BFC6E3900EA1D8D /* YLLoopScrollView.m */; };
-		397E7B9D1BFDA9FA00EA1D8D /* YLLoopImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = 397E7B9C1BFDA9FA00EA1D8D /* YLLoopImageView.m */; };
 		397E7BCE1BFEEEDF00EA1D8D /* 1.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 397E7BCA1BFEEEDF00EA1D8D /* 1.jpg */; };
 		397E7BCF1BFEEEDF00EA1D8D /* 2.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 397E7BCB1BFEEEDF00EA1D8D /* 2.jpg */; };
 		397E7BD01BFEEEDF00EA1D8D /* 3.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 397E7BCC1BFEEEDF00EA1D8D /* 3.jpg */; };
@@ -102,8 +101,6 @@
 		397E7B501BFC6DC200EA1D8D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		397E7B601BFC6E3900EA1D8D /* YLLoopScrollView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = YLLoopScrollView.h; path = YLLoopScrollView/YLLoopScrollView.h; sourceTree = "<group>"; };
 		397E7B611BFC6E3900EA1D8D /* YLLoopScrollView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = YLLoopScrollView.m; path = YLLoopScrollView/YLLoopScrollView.m; sourceTree = "<group>"; };
-		397E7B9B1BFDA9FA00EA1D8D /* YLLoopImageView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = YLLoopImageView.h; path = YLLoopScrollView/YLLoopImageView.h; sourceTree = "<group>"; };
-		397E7B9C1BFDA9FA00EA1D8D /* YLLoopImageView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = YLLoopImageView.m; path = YLLoopScrollView/YLLoopImageView.m; sourceTree = "<group>"; };
 		397E7BCA1BFEEEDF00EA1D8D /* 1.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = 1.jpg; sourceTree = "<group>"; };
 		397E7BCB1BFEEEDF00EA1D8D /* 2.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = 2.jpg; sourceTree = "<group>"; };
 		397E7BCC1BFEEEDF00EA1D8D /* 3.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = 3.jpg; sourceTree = "<group>"; };
@@ -244,8 +241,6 @@
 			children = (
 				397E7B601BFC6E3900EA1D8D /* YLLoopScrollView.h */,
 				397E7B611BFC6E3900EA1D8D /* YLLoopScrollView.m */,
-				397E7B9B1BFDA9FA00EA1D8D /* YLLoopImageView.h */,
-				397E7B9C1BFDA9FA00EA1D8D /* YLLoopImageView.m */,
 			);
 			name = YLLoopScrollView;
 			sourceTree = "<group>";
@@ -395,7 +390,6 @@
 				0034C3AF1C3048110087DB48 /* UIButton+WebCache.m in Sources */,
 				0034C3B11C3048110087DB48 /* UIImage+MultiFormat.m in Sources */,
 				0034C3B31C3048110087DB48 /* UIImageView+WebCache.m in Sources */,
-				397E7B9D1BFDA9FA00EA1D8D /* YLLoopImageView.m in Sources */,
 				0034C3AC1C3048110087DB48 /* SDWebImageDownloaderOperation.m in Sources */,
 				0034C3B01C3048110087DB48 /* UIImage+GIF.m in Sources */,
 				0034C3A91C3048110087DB48 /* SDWebImageCompat.m in Sources */,

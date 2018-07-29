@@ -7,485 +7,287 @@
 //
 
 #import "YLLoopScrollView.h"
-#import "YLLoopImageView.h"
+#import <objc/runtime.h>
+#import <objc/message.h>
+
 
 @interface YLLoopScrollView () <UIScrollViewDelegate>
-{
-    YLLoopImageView *_firstImageView;
-    YLLoopImageView *_secondImageView;
-    YLLoopImageView *_thirdImageView;
-    UIScrollView *_scrollView;
-    UIPageControl *_pageControl;
-}
 
-/**
- *  定时器
- */
+@property (nonatomic, strong) UIScrollView *scrollView;
+@property (nonatomic, strong) YLLoopView *preView;
+@property (nonatomic, strong) YLLoopView *currentView;
+@property (nonatomic, strong) YLLoopView *nextView;
+
+@property (nonatomic, strong) UIPageControl *pageControl;
+@property (nonatomic, assign) int currentIndex;
+
 @property (nonatomic, strong) NSTimer *timer;
+@property (nonatomic, assign) NSTimeInterval t;
 
-/**
- *  是否是网络图片
- */
-@property (nonatomic, assign, getter=isUrlImages) BOOL urlImages;
+@end
 
-/**
- *  当前显示的序号
- */
-@property (nonatomic, assign) NSInteger currentIndex;
-
-/**
- *  默认显示的图片
- */
-@property (nonatomic, strong) UIImage *placeholderImage;
+@interface YLLoopView : UIControl
+@property (nonatomic, copy)   YLLoopScrollViewSetupBlock setupBlock;
+@property (nonatomic, strong) NSString *customViewClass;
+@property (nonatomic, strong) UIView *customView;
+@property (nonatomic, copy)   NSString *property;
+@property (nonatomic, strong) id obj;
 @end
 
 @implementation YLLoopScrollView
 
-
-#pragma mark - 创建实例对象
-- (instancetype)initWithFrame:(CGRect)frame localImagesSource:(NSArray *)sourceArr
-{
-    if(self = [super initWithFrame:frame])
-    {
-        [self initializeSubviews];
-        _dataSource = sourceArr;
-        self.urlImages = NO;
-        self.showPageControl = YES;
-        self.timeInterval = kDefaultTimeInterval;
-        [self reloadData];
++ (instancetype)loopScrollViewWithTimer:(NSTimeInterval)time customView:(YLLoopScrollViewSetupBlock)setupBlock {
+    YLLoopScrollView *loopView = [[YLLoopScrollView alloc] init];
+    if(setupBlock == nil) {
+        setupBlock = ^NSDictionary * {
+            return @{@"YLImageView" : @"url"};
+        };
     }
-    return self;
-}
-
-- (instancetype)initWithFrame:(CGRect)frame imageUrlsSource:(NSArray *)sourceArr placeholderImage:(UIImage *)holderImage
-{
-    if(self = [super initWithFrame:frame])
-    {
-        [self initializeSubviews];
-        _dataSource = sourceArr;
-        self.urlImages = YES;
-        self.showPageControl = YES;
-        self.placeholderImage = holderImage;
-        self.timeInterval = kDefaultTimeInterval;
-        [self reloadData];
+    loopView.preView.setupBlock = setupBlock;
+    loopView.nextView.setupBlock = setupBlock;
+    loopView.currentView.setupBlock = setupBlock;
+    
+    if(time > 0) {
+        loopView.timer = [NSTimer scheduledTimerWithTimeInterval:time target:loopView selector:@selector(loop) userInfo:nil repeats:YES];
+        loopView.t = time;
     }
-    return self;
+    return loopView;
 }
 
-- (instancetype)initWithLocalImagesSource:(NSArray *)sourceArr
-{
-    return [self initWithFrame:CGRectZero localImagesSource:sourceArr];
+- (void)loop {
+    [self.scrollView setContentOffset:CGPointMake(self.scrollView.frame.size.width * 2, 0) animated:YES];
 }
 
-- (instancetype)initWithImageUrlsSource:(NSArray *)sourceArr placeholderImage:(UIImage *)holderImage
-{
-    return [self initWithFrame:CGRectZero imageUrlsSource:sourceArr placeholderImage:holderImage];
-}
-
-+ (instancetype)loopScrollViewWithFrame:(CGRect)frame localImagesSource:(NSArray *)sourceArr
-{
-    return [[[self class] alloc] initWithFrame:frame localImagesSource:sourceArr];
-}
-
-+ (instancetype)loopScrollViewWithFrame:(CGRect)frame imageUrlsSource:(NSArray *)sourceArr placeholderImage:(UIImage *)holderImage
-{
-    return [[[self class] alloc] initWithFrame:frame imageUrlsSource:sourceArr placeholderImage:holderImage];
-}
-
-+ (instancetype)loopScrollViewWithLocalImagesSource:(NSArray *)sourceArr
-{
-    return [[self class] loopScrollViewWithFrame:CGRectZero localImagesSource:sourceArr];
-}
-+ (instancetype)loopScrollViewWithImageUrlsSource:(NSArray *)sourceArr placeholderImage:(UIImage *)holderImage
-{
-    return [[self class] loopScrollViewWithFrame:CGRectZero imageUrlsSource:sourceArr placeholderImage:holderImage];
-}
-
-- (instancetype)initWithFrame:(CGRect)frame
-{
-    if(self = [super initWithFrame:frame])
-    {
-        [self initializeSubviews];
-    }
-    return self;
-}
-
-- (instancetype)init
-{
-    if(self = [super init])
-    {
-        [self initializeSubviews];
-    }
-    return self;
-}
-
-#pragma mark 初始化子控件
-- (void)initializeSubviews
-{
-    _scrollView = [[UIScrollView alloc]init];
-    _scrollView.backgroundColor = [UIColor whiteColor];
-    _scrollView.delegate = self;
-    _scrollView.pagingEnabled = YES;
-    _scrollView.bounces = NO;
-    _scrollView.showsHorizontalScrollIndicator = NO;
-    _scrollView.showsVerticalScrollIndicator = NO;
-    [self addSubview:_scrollView];
-    
-    _firstImageView = [[YLLoopImageView alloc] init];
-    _secondImageView = [[YLLoopImageView alloc] init];
-    _thirdImageView = [[YLLoopImageView alloc] init];
-    [_scrollView addSubview:_firstImageView];
-    [_scrollView addSubview:_secondImageView];
-    [_scrollView addSubview:_thirdImageView];
-    
-    __block typeof(self) blockSelf = self;
-    _firstImageView.tapBlock = ^(YLLoopImageView *imageView){
-        
-        if(blockSelf.imageViewClickBlock)
-        {
-            blockSelf.imageViewClickBlock(imageView, imageView.tag);
-        }
-    };
-    _secondImageView.tapBlock = ^(YLLoopImageView *imageView){
-        
-        if(blockSelf.imageViewClickBlock)
-        {
-            blockSelf.imageViewClickBlock(imageView, imageView.tag);
-        }
-    };
-    _thirdImageView.tapBlock = ^(YLLoopImageView *imageView){
-        
-        if(blockSelf.imageViewClickBlock)
-        {
-            blockSelf.imageViewClickBlock(imageView, imageView.tag);
-        }
-    };
-    
-    _pageControl = [[UIPageControl alloc] init];
-    _pageControl.defersCurrentPageDisplay = YES;
-    [_pageControl addTarget:self action:@selector(pageControlValueChange:) forControlEvents:UIControlEventValueChanged];
-    [self addSubview:_pageControl];
-}
-#pragma mark 设置frame
-- (void)layoutSubviews
-{
-    [super layoutSubviews];
-    
-    _scrollView.frame = self.bounds;
-    _scrollView.contentSize = CGSizeMake(self.frame.size.width * 3, 0);
-    _scrollView.contentOffset = CGPointMake(self.frame.size.width, 0);
-    
-    CGFloat width = _scrollView.frame.size.width;
-    CGFloat height = _scrollView.frame.size.height;
-    _firstImageView.frame = CGRectMake(0, 0, width, height);
-    _secondImageView.frame = CGRectMake(width, 0, width, height);
-    _thirdImageView.frame = CGRectMake(width * 2, 0, width, height);
-    
-    _pageControl.frame = CGRectMake(0, height - 10, width, 10);
-}
-#pragma mark - 更改了pageControl的值
-- (void)pageControlValueChange:(UIPageControl *)pageControl
-{
-    if(pageControl.currentPage == self.currentIndex + 1)
-    {
-        // 向右循环
-        [UIView animateWithDuration:0.5 animations:^{
-            
-            _scrollView.contentOffset = CGPointMake(self.frame.size.width * 2, 0);
-            
-        } completion:^(BOOL finished) {
-            
-            [self scrollViewDidEndDecelerating:_scrollView];
-            
-        }];
-    }
-    else if (pageControl.currentPage == self.currentIndex - 1)
-    {
-        // 向左循环
-        [UIView animateWithDuration:0.5 animations:^{
-            
-            _scrollView.contentOffset = CGPointZero;
-            
-        } completion:^(BOOL finished) {
-            
-            [self scrollViewDidEndDecelerating:_scrollView];
-            
-        }];
-    }
-}
-#pragma mark 是否显示分页控件
-- (void)setShowPageControl:(BOOL)showPageControl
-{
-    _showPageControl = showPageControl;
-    
-    _pageControl.hidden = !showPageControl;
-}
-#pragma mark 设置pageControl 的默认颜色
-- (void)setPageControlDefaultColor:(UIColor *)pageControlDefaultColor
-{
-    _pageControlDefaultColor = pageControlDefaultColor;
-    
-    _pageControl.pageIndicatorTintColor = _pageControlDefaultColor;
-}
-#pragma mark 设置pageControl 的当前页面的颜色
-- (void)setPageControlCurrentPageColor:(UIColor *)pageControlCurrentPageColor
-{
-    _pageControlCurrentPageColor = pageControlCurrentPageColor;
-    
-    _pageControl.currentPageIndicatorTintColor = pageControlCurrentPageColor;
-}
-
-#pragma mark - 设置定时器的时间间隔
-- (void)setTimeInterval:(NSTimeInterval)timeInterval
-{
-    _timeInterval = timeInterval <= 0.0 ? kDefaultTimeInterval : timeInterval;
-}
-
-#pragma mark 开始定时器
-- (void)startTimer
-{
-    if(self.timer == nil)
-    {
-        self.timer = [[NSTimer alloc] initWithFireDate:[NSDate dateWithTimeIntervalSinceNow:self.timeInterval] interval:self.timeInterval target:self selector:@selector(updateCurrentPage) userInfo:nil repeats:YES];
-        [[NSRunLoop currentRunLoop] addTimer:self.timer forMode:NSDefaultRunLoopMode];
-    }
-    else
-    {
-        [self.timer setFireDate:[NSDate dateWithTimeIntervalSinceNow:self.timeInterval]];
-    }
-}
-
-#pragma mark 暂停定时器
-- (void)pauseTimer
-{
-    if(self.timer)
-    {
-        [self.timer setFireDate:[NSDate distantFuture]];
-    }
-}
-
-#pragma mark 从父控件移除后，销毁计时器
-- (void)removeFromSuperview
-{
+- (void)removeFromSuperview {
     [super removeFromSuperview];
-    
-    [self.timer invalidate];
-    self.timer = nil;
+    if(self.timer) {
+        [self.timer invalidate];
+        self.timer = nil;
+    }
 }
 
-#pragma mark - 轮播, 更新页面
-- (void)updateCurrentPage
-{
-    // 向右循环
-    [UIView animateWithDuration:0.5 animations:^{
+- (instancetype)initWithFrame:(CGRect)frame {
+    if(self = [super initWithFrame:frame]) {
+        self.scrollView = [[UIScrollView alloc] init];
+        [self addSubview:self.scrollView];
+        self.scrollView.backgroundColor = [UIColor clearColor];
+        self.scrollView.delegate = self;
+        self.scrollView.pagingEnabled = YES;
+        self.scrollView.bounces = NO;
+        self.scrollView.showsHorizontalScrollIndicator = NO;
+        self.scrollView.showsVerticalScrollIndicator = NO;
         
-        _scrollView.contentOffset = CGPointMake(self.frame.size.width * 2, 0);
-        
-    } completion:^(BOOL finished) {
-        
-        [self scrollViewDidEndDecelerating:_scrollView];
-        
-    }];
+        self.preView = [[YLLoopView alloc] init];
+        self.currentView = [[YLLoopView alloc] init];
+        self.nextView = [[YLLoopView alloc] init];
+        [self.scrollView addSubview:self.preView];
+        [self.scrollView addSubview:self.currentView];
+        [self.scrollView addSubview:self.nextView];
+        [self.preView addTarget:self action:@selector(loopViewClick:) forControlEvents:UIControlEventTouchUpInside];
+        [self.currentView addTarget:self action:@selector(loopViewClick:) forControlEvents:UIControlEventTouchUpInside];
+        [self.nextView addTarget:self action:@selector(loopViewClick:) forControlEvents:UIControlEventTouchUpInside];
+        self.currentIndex = 0;
+    }
+    return self;
 }
 
-#pragma mark 刷新显示数据
-- (void)reloadData
-{
-    if(self.dataSource.count == 0)  return;
-    
-    NSString *secondImage = self.dataSource.firstObject;
-    NSString *firstImage = self.dataSource.lastObject;
-    NSString *thirdImage = self.dataSource.count == 1 ? self.dataSource.firstObject : self.dataSource[1];
-    
-    _firstImageView.placeholderImage = self.placeholderImage;
-    _secondImageView.placeholderImage = self.placeholderImage;
-    _thirdImageView.placeholderImage = self.placeholderImage;
-    
-    if(self.isUrlImages)
-    {
-        _firstImageView.url = firstImage;
-        _secondImageView.url = secondImage;
-        _thirdImageView.url = thirdImage;
+- (void)loopViewClick:(YLLoopView *)loopView {
+    if(self.clickedBlock) {
+        self.clickedBlock(self.currentIndex);
     }
-    else
-    {
-        _firstImageView.image = [UIImage imageNamed:firstImage];
-        _secondImageView.image = [UIImage imageNamed:secondImage];
-        _thirdImageView.image = [UIImage imageNamed:thirdImage];
-    }
-    
+}
+
+- (void)setDataSourceArr:(NSArray *)dataSourceArr {
+    _dataSourceArr = dataSourceArr;
     self.currentIndex = 0;
-    _pageControl.numberOfPages = self.dataSource.count;
-    _pageControl.currentPage = self.currentIndex;
+    if(dataSourceArr.count) {
+        self.currentView.obj = dataSourceArr.firstObject;
+        self.preView.obj = dataSourceArr.lastObject;
+        if(dataSourceArr.count > 1) {
+            self.nextView.obj = dataSourceArr[1];
+        } else {
+            self.nextView.obj = dataSourceArr.firstObject;
+        }
+        if(self.timer) {
+            [self.timer fire];
+        }
+    }
 }
 
-#pragma mark - UIScrollview 代理方法
-#pragma mark 滑动过程中多次调用
-- (void)scrollViewDidScroll:(UIScrollView *)scrollView
-{
-    YLLoopScrollViewScrollDirection direction = YLLoopScrollViewScrollDirectionFromLeftToRight;
-    if(scrollView.contentOffset.x > self.frame.size.width)
-    {
-        direction = YLLoopScrollViewScrollDirectionFromRightToLeft;
-    }
-    
-    if([self.delegate respondsToSelector:@selector(loopScrollViewDidScroll:scrollDirection:)] && _scrollView.contentOffset.x != self.frame.size.width)
-    {
-        [self.delegate loopScrollViewDidScroll:self scrollDirection:direction];
-    }
-}
-#pragma mark 将要开始拖拽
-- (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView
-{
-    if(self.timer.valid)
-    {
-        [self pauseTimer];
-    }
-}
-#pragma mark 将要停止拖拽
-- (void)scrollViewWillEndDragging:(UIScrollView *)scrollView withVelocity:(CGPoint)velocity targetContentOffset:(inout CGPoint *)targetContentOffset
-{
-    
-}
-#pragma mark 停止拖拽
-- (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate
-{
-    
-}
-#pragma mark 停止拖拽，将要开始减速
-- (void)scrollViewWillBeginDecelerating:(UIScrollView *)scrollView
-{
-    if([self.delegate respondsToSelector:@selector(loopScrollViewWillBeginDecelerating:)])
-    {
-        [self.delegate loopScrollViewWillBeginDecelerating:self];
-    }
-}
-#pragma mark 已经停止减速
-- (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView
-{
-    if(self.timer.valid)
-    {
-        [self startTimer];
-    }
+- (void)layoutSubviews {
+    [super layoutSubviews];
     
     CGFloat width = self.frame.size.width;
     CGFloat height = self.frame.size.height;
     
+    self.scrollView.contentOffset = CGPointMake(width, 0);
+    self.scrollView.contentSize = CGSizeMake(width * 3, height);
+    self.scrollView.contentInset = UIEdgeInsetsZero;
+    self.scrollView.frame = self.bounds;
+    self.preView.frame = CGRectMake(0, 0, width, height);
+    self.currentView.frame = CGRectMake(width, 0, width, height);
+    self.nextView.frame = CGRectMake(width * 2, 0, width, height);
+}
+
+#pragma mark - UIScrollview 代理方法
+#pragma mark 将要开始手动拖拽，停止计时器
+- (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView {
+    [self.timer setFireDate:[NSDate distantFuture]];
+}
+#pragma mark 拖拽结束，开启计时器
+- (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView {
+    [self refreshScrollViewLayout];
+    if(self.timer) {
+        [self.timer setFireDate:[NSDate dateWithTimeIntervalSinceNow:self.t]];
+    }
+}
+#pragma mark 已经停止滑动
+- (void)scrollViewDidEndScrollingAnimation:(UIScrollView *)scrollView {
+    [self refreshScrollViewLayout];
+}
+
+#pragma mark 重新布局
+- (void)refreshScrollViewLayout {
+    CGFloat width = self.frame.size.width;
+    CGFloat height = self.frame.size.height;
+    
     // 向右滑动
-    if (_scrollView.contentOffset.x == 0)
-    {
-        self.currentIndex--;
-        if(self.currentIndex < 0)
-        {
-            self.currentIndex = self.dataSource.count - 1;
-        }
+    if (self.scrollView.contentOffset.x == 0) {
         // 滑动到了第一页
-        for(YLLoopImageView *imageView in _scrollView.subviews)
-        {
-            if(imageView.frame.origin.x > width * 1.5)
-            {
+        for(YLLoopView *view in self.scrollView.subviews) {
+            if(view.frame.origin.x > width * 1.5) {
                 // 最后一页 放到第一页
-                imageView.frame = CGRectMake(0, 0, width, height);
-                imageView.tag = self.currentIndex - 1 < 0 ? self.dataSource.count - 1 : self.currentIndex - 1;
-                
-                if(self.isUrlImages)
-                {
-                    imageView.url = self.dataSource[imageView.tag];
+                view.frame = CGRectMake(0, 0, width, height);
+                self.preView = view;
+                if(self.dataSourceArr.count == 1) {
+                    self.preView.obj = self.dataSourceArr.firstObject;
+                } else if(self.dataSourceArr.count == 2) {
+                    if(self.currentIndex == 0)  self.preView.obj = self.dataSourceArr[0];
+                    else self.preView.obj = self.dataSourceArr[1];
+                } else {
+                    if(self.currentIndex == 0){
+                        self.preView.obj = self.dataSourceArr[self.dataSourceArr.count - 2];
+                    } else if (self.currentIndex == 1) {
+                        self.preView.obj = self.dataSourceArr[self.dataSourceArr.count - 1];
+                    } else if (self.currentIndex == 2) {
+                        self.preView.obj = self.dataSourceArr.firstObject;
+                    } else {
+                        self.preView.obj = self.dataSourceArr[self.currentIndex - 2];
+                    }
                 }
-                else
-                {
-                    imageView.image = [UIImage imageNamed:self.dataSource[imageView.tag]];
+                if(--self.currentIndex < 0) {
+                    self.currentIndex = (int)self.dataSourceArr.count - 1;
                 }
-            }
-            else if (imageView.frame.origin.x < width * 0.5)
-            {
+            } else if (view.frame.origin.x < width * 0.5) {
                 // 第一页 放到第二页
-                imageView.frame = CGRectMake(width, 0, width, height);
-                imageView.tag = self.currentIndex;
-            }
-            else
-            {
+                view.frame = CGRectMake(width, 0, width, height);
+                self.currentView = view;
+            } else {
                 // 第二页放到第三页
-                imageView.frame = CGRectMake(width * 2, 0, width, height);
-                imageView.tag = self.currentIndex + 1 >= self.dataSource.count ? 0 : self.currentIndex + 1;
-                if(self.isUrlImages)
-                {
-                    imageView.url = self.dataSource[imageView.tag];
-                }
-                else
-                {
-                    imageView.image = [UIImage imageNamed:self.dataSource[imageView.tag]];
-                }
+                view.frame = CGRectMake(width * 2, 0, width, height);
+                self.nextView = view;
             }
-        }
-        _scrollView.contentOffset = CGPointMake(width, 0);
-        _pageControl.currentPage = self.currentIndex;
-        
-        if([self.delegate respondsToSelector:@selector(loopScrollView:didEndDeceleratingWithDirection: currentIndex:)])
-        {
-            [self.delegate loopScrollView:self didEndDeceleratingWithDirection:YLLoopScrollViewScrollDirectionFromLeftToRight currentIndex:self.currentIndex];
         }
     }
     // 向左滑动
-    else if(_scrollView.contentOffset.x == width * 2)
-    {
-        self.currentIndex++;
-        if(self.currentIndex >= self.dataSource.count)
-        {
-            self.currentIndex = 0;
-        }
+    else if(self.scrollView.contentOffset.x == width * 2) {
+        // 把第1组数据删掉,在最后增加一组新的
         // 滑动到了第三页
-        for(YLLoopImageView *imageView in _scrollView.subviews)
-        {
-            if(imageView.frame.origin.x > width * 1.5)
-            {
+        for(YLLoopView *view in self.scrollView.subviews) {
+            if(view.frame.origin.x > width * 1.5) {
                 // 最后一页 放到第二页
-                imageView.frame = CGRectMake(width, 0, width, height);
-                imageView.tag = self.currentIndex;
-            }
-            else if (imageView.frame.origin.x < width * 0.5)
-            {
+                view.frame = CGRectMake(width, 0, width, height);
+                self.currentView = view;
+            } else if (view.frame.origin.x < width * 0.5) {
                 // 第一页 放到第三页
-                imageView.frame = CGRectMake(width * 2, 0, width, height);
-                imageView.tag = self.currentIndex + 1 >= self.dataSource.count ? 0 : self.currentIndex + 1;
-                
-                if(self.isUrlImages)
-                {
-                    imageView.url = self.dataSource[imageView.tag];
+                view.frame = CGRectMake(width * 2, 0, width, height);
+                self.nextView = view;
+                if(self.dataSourceArr.count == 1) {
+                    self.nextView.obj = self.dataSourceArr.firstObject;
+                } else if(self.dataSourceArr.count == 2) {
+                    if(self.currentIndex == 0)  self.nextView.obj = self.dataSourceArr[0];
+                    else self.nextView.obj = self.dataSourceArr[1];
+                } else {
+                    if(self.currentIndex == self.dataSourceArr.count - 2){
+                        self.nextView.obj = self.dataSourceArr.firstObject;
+                    } else if(self.currentIndex == self.dataSourceArr.count - 1) {
+                        self.nextView.obj = self.dataSourceArr[1];
+                    } else if (self.currentIndex == self.dataSourceArr.count - 3) {
+                        self.nextView.obj = self.dataSourceArr.lastObject;
+                    } else {
+                        self.nextView.obj = self.dataSourceArr[self.currentIndex + 2];
+                    }
                 }
-                else
-                {
-                    imageView.image = [UIImage imageNamed:self.dataSource[imageView.tag]];
+                if(++ self.currentIndex >= self.dataSourceArr.count) {
+                    self.currentIndex = 0;
                 }
-            }
-            else
-            {
+            } else {
                 // 第二页放到第一页
-                imageView.frame = CGRectMake(0, 0, width, height);
-                imageView.tag = self.currentIndex - 1 < 0 ? self.dataSource.count - 1 : self.currentIndex - 1;
-                if(self.isUrlImages)
-                {
-                    imageView.url = self.dataSource[imageView.tag];
-                }
-                else
-                {
-                    imageView.image = [UIImage imageNamed:self.dataSource[imageView.tag]];
-                }
+                view.frame = CGRectMake(0, 0, width, height);
+                self.preView = view;
             }
         }
-        _scrollView.contentOffset = CGPointMake(width, 0);
-        _pageControl.currentPage = self.currentIndex;
-        
-        if([self.delegate respondsToSelector:@selector(loopScrollView:didEndDeceleratingWithDirection: currentIndex:)])
-        {
-            [self.delegate loopScrollView:self didEndDeceleratingWithDirection:YLLoopScrollViewScrollDirectionFromRightToLeft currentIndex:self.currentIndex];
-        }
+    } else {
+        return;
     }
+    // 设置偏移量，使第二页处于中间
+    self.scrollView.contentOffset = CGPointMake(width, 0);
+}
+@end
+
+@implementation YLLoopView
+
+- (void)setSetupBlock:(YLLoopScrollViewSetupBlock)setupBlock {
+    _setupBlock = [setupBlock copy];
+    self.customViewClass = self.setupBlock().allKeys.firstObject;
+    self.property = self.setupBlock().allValues.firstObject;
+    // 添加自定义view
+    self.customView = [[NSClassFromString(self.customViewClass) alloc] init];
+    [self addSubview:self.customView];
 }
 
-#pragma mark 停止带动画的滚动（setContentOffsize/scrollRectVisible:  animated: 结束时有效）在scrollViewDidEndDecelerating 后调用
-- (void)scrollViewDidEndScrollingAnimation:(UIScrollView *)scrollView
-{
-    
+- (void)setObj:(id)obj {
+    _obj = obj;
+    NSString *set = [NSString stringWithFormat:@"set%@:",[self.property capitalizedString]];
+    SEL sel = NSSelectorFromString(set);
+    ((void (*)(id,SEL,id))objc_msgSend)((id)self.customView, sel,obj);
 }
+
+- (void)layoutSubviews {
+    [super layoutSubviews];
+    self.customView.frame = self.bounds;
+}
+
+
+@end
+
+@implementation YLImageView
+
+- (void)setUrl:(NSString *)url {
+    _url = [url copy];
+    if([url isKindOfClass:[NSNull class]] || url.length == 0)   return;
+    NSURL *imageUrl;
+    if([url isKindOfClass:[NSString class]]) {
+        imageUrl = [NSURL URLWithString:_url];
+    } else if([url isKindOfClass:[NSURL class]]){
+        imageUrl = (NSURL *)_url;
+    } else {
+        return;
+    }
+    __weak typeof(self) weakSelf = self;
+    NSURLRequest *request = [NSURLRequest requestWithURL:imageUrl cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:10];
+    NSURLSessionDataTask *task = [[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+        if(error == nil && data.length) {
+            // 获取到图片
+            NSLog(@"图片下载成功 : %@", url);
+            dispatch_async(dispatch_get_main_queue(), ^{
+                weakSelf.image = [UIImage imageWithData:data];
+            });
+        } else {
+            NSLog(@"图片下载失败 : %@  error : %@", url, error.userInfo);
+        }
+    }];
+    [task resume];
+}
+
 @end
