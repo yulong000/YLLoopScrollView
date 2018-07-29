@@ -40,3 +40,20 @@ scrollView.frame = CGRectMake(0, 0, self.view.frame.size.width, 150);
 so easy ~~~ (具体使用方法请看demo)
 ----------
 
+### 最简单的应用
+``` Objective-c
+NSArray *arr = @[[UIImage imageNamed:@"1.jpg"],
+                     [UIImage imageNamed:@"2.jpg"],
+                     [UIImage imageNamed:@"3.jpg"],
+                     [UIImage imageNamed:@"4.jpg"]];
+    YLLoopScrollView *scrollView = [YLLoopScrollView loopScrollViewWithTimer:2 customView:^NSDictionary *{
+        return @{@"UIImageView" : @"image"};
+    }];
+    scrollView.dataSourceArr = arr;
+    scrollView.clickedBlock = ^(NSInteger index) {
+        // todo
+    };
+    scrollView.frame = CGRectMake(0, 0, self.view.frame.size.width, 100);
+    [self.view addSubview:scrollView];
+```
+
