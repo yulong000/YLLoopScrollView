@@ -2,7 +2,7 @@
 //  YLLoopScrollView.m
 //  YLLoopScrollView
 //
-//  Created by DreamHand on 15/11/18.
+//  Created by weiyulong on 15/11/18.
 //  Copyright © 2015年 WYL. All rights reserved.
 //
 
@@ -318,6 +318,9 @@
             });
         } else {
             NSLog(@"图片下载失败 : %@  error : %@", url, error.userInfo);
+            dispatch_async(dispatch_get_main_queue(), ^{
+                weakSelf.image = nil;
+            });
         }
     }];
     [task resume];

@@ -30,8 +30,12 @@
         NSString * str = arr[index];
         NSLog(@"index : %ld  url : %@", index, str);
     };
+    // ------------------- //
+    // 根据自己需求设置
+//    scrollView.showPageControl = NO;
     scrollView.pageControl.currentPageIndicatorTintColor = [UIColor redColor];
     scrollView.showPageControlAtBottom = YES;
+    // ------------------- //
     scrollView.frame = CGRectMake(0, 100, self.view.frame.size.width, 100);
     scrollView.dataSourceArr = arr;
     [self.view addSubview:scrollView];
@@ -48,9 +52,8 @@
         YLCustomViewModel *model = arr1[index];
         NSLog(@"index : %ld  title : %@", index, model.title);
     };
-    scrollView1.pageControl.currentPageIndicatorTintColor = [UIColor redColor];
-    scrollView1.frame = CGRectMake(0, 300, self.view.frame.size.width, 150);
     scrollView1.dataSourceArr = arr1;
+    scrollView1.frame = CGRectMake(0, 300, self.view.frame.size.width, 150);
     [self.view addSubview:scrollView1];
 
 }

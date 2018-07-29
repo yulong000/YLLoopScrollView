@@ -2,7 +2,7 @@
 //  YLLoopScrollView.h
 //  YLLoopScrollView
 //
-//  Created by DreamHand on 15/11/18.
+//  Created by weiyulong on 15/11/18.
 //  Copyright © 2015年 WYL. All rights reserved.
 //
 
