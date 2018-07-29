@@ -10,7 +10,7 @@
 
 #### 2.调用类方法构造实例对象
 ```Objective-c
-// 传入轮播的时间,自定义轮播的view,和需要重新赋值的model
+// 传入轮播的时间(0 代表不启用定时器),需要轮播的自定义view,和需要重新赋值的model
 YLLoopScrollView *scrollView = [YLLoopScrollView loopScrollViewWithTimer:2 customView:^NSDictionary *{
         return @{@"YLCustomView" : @"model"};
     }];
