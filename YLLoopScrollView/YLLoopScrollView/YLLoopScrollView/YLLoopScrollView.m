@@ -10,8 +10,6 @@
 #import <objc/runtime.h>
 #import <objc/message.h>
 
-#define kPageControlHeight 10
-
 @interface YLLoopScrollView () <UIScrollViewDelegate>
 
 @property (nonatomic, strong) UIScrollView *scrollView;

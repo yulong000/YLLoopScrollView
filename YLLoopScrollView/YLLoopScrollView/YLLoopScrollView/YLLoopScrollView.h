@@ -7,6 +7,9 @@
 //
 
 #import <UIKit/UIKit.h>
+
+// 默认的pageContorl的高度
+#define kPageControlHeight 15
 @class YLLoopView;
 
 // 点击了customView返回当前点击的index
