@@ -1,10 +1,12 @@
 # YLLoopScrollView
 ### 无限轮播, 可以是图片, 可以是任意的自定义view
-=======
+
 ### 使用教程:
 -------
 #### 1.导入头文件
+```Objective-c
 #import "YLLoopScrollView.h"
+```
 
 #### 2.调用类方法构造实例对象
 ```Objective-c
@@ -35,5 +37,6 @@ scrollView.frame = CGRectMake(0, 0, self.view.frame.size.width, 150);
 [self.view addSubview:scrollView];
 ```
 
-so easy ~~~
+so easy ~~~ \<br> (具体使用方法请看demo)
 ----------
+
