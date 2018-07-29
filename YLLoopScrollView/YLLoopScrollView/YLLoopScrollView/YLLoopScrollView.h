@@ -40,7 +40,7 @@ typedef NSDictionary * (^YLLoopScrollViewSetupBlock)(void);
  构造方法
 
  @param time 计时器时间间隔, time = 0 时不添加计时器
- @param customView 设置自定义的view, 如果返回 nil, 则默认为 YLImageView, dataSourceArr 存放的是 url 的数组
+ @param setupBlock 设置自定义的view, 如果返回 nil, 则默认为 YLImageView, dataSourceArr 存放的是 url 的数组
  */
 + (instancetype)loopScrollViewWithTimer:(NSTimeInterval)time customView:(YLLoopScrollViewSetupBlock)setupBlock;
 
