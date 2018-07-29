@@ -10,6 +10,7 @@
 #import <objc/runtime.h>
 #import <objc/message.h>
 
+#define kPageControlHeight 10
 
 @interface YLLoopScrollView () <UIScrollViewDelegate>
 
@@ -69,24 +70,32 @@
 - (instancetype)initWithFrame:(CGRect)frame {
     if(self = [super initWithFrame:frame]) {
         self.scrollView = [[UIScrollView alloc] init];
-        [self addSubview:self.scrollView];
         self.scrollView.backgroundColor = [UIColor clearColor];
         self.scrollView.delegate = self;
         self.scrollView.pagingEnabled = YES;
         self.scrollView.bounces = NO;
         self.scrollView.showsHorizontalScrollIndicator = NO;
         self.scrollView.showsVerticalScrollIndicator = NO;
+        [self addSubview:self.scrollView];
         
         self.preView = [[YLLoopView alloc] init];
         self.currentView = [[YLLoopView alloc] init];
         self.nextView = [[YLLoopView alloc] init];
-        [self.scrollView addSubview:self.preView];
-        [self.scrollView addSubview:self.currentView];
-        [self.scrollView addSubview:self.nextView];
         [self.preView addTarget:self action:@selector(loopViewClick:) forControlEvents:UIControlEventTouchUpInside];
         [self.currentView addTarget:self action:@selector(loopViewClick:) forControlEvents:UIControlEventTouchUpInside];
         [self.nextView addTarget:self action:@selector(loopViewClick:) forControlEvents:UIControlEventTouchUpInside];
+        [self.scrollView addSubview:self.preView];
+        [self.scrollView addSubview:self.currentView];
+        [self.scrollView addSubview:self.nextView];
+        
+        self.pageControl = [[UIPageControl alloc] init];
+        self.pageControl.hidesForSinglePage = YES;
+        self.pageControl.userInteractionEnabled = NO;
+        [self addSubview:self.pageControl];
+        
         self.currentIndex = 0;
+        self.showPageControl = YES;
+        self.showPageControlAtBottom = NO;
     }
     return self;
 }
@@ -96,11 +105,27 @@
         self.clickedBlock(self.currentIndex);
     }
 }
+- (void)setShowPageControl:(BOOL)showPageControl {
+    _showPageControl = showPageControl;
+    if(showPageControl == NO) {
+        [self.pageControl removeFromSuperview];
+        self.pageControl = nil;
+    }
+    [self setNeedsLayout];
+}
+
+- (void)setCurrentIndex:(int)currentIndex {
+    _currentIndex = currentIndex;
+    if(self.dataSourceArr.count) {
+        self.pageControl.currentPage = currentIndex;
+    }
+}
 
 - (void)setDataSourceArr:(NSArray *)dataSourceArr {
     _dataSourceArr = dataSourceArr;
     self.currentIndex = 0;
     if(dataSourceArr.count) {
+        self.pageControl.numberOfPages = dataSourceArr.count;
         self.currentView.obj = dataSourceArr.firstObject;
         self.preView.obj = dataSourceArr.lastObject;
         if(dataSourceArr.count > 1) {
@@ -123,10 +148,15 @@
     self.scrollView.contentOffset = CGPointMake(width, 0);
     self.scrollView.contentSize = CGSizeMake(width * 3, height);
     self.scrollView.contentInset = UIEdgeInsetsZero;
-    self.scrollView.frame = self.bounds;
+    if(self.showPageControl && self.showPageControlAtBottom) {
+        self.scrollView.frame = CGRectMake(0, 0, width, height - kPageControlHeight);
+    } else {
+        self.scrollView.frame = self.bounds;
+    }
     self.preView.frame = CGRectMake(0, 0, width, height);
     self.currentView.frame = CGRectMake(width, 0, width, height);
     self.nextView.frame = CGRectMake(width * 2, 0, width, height);
+    self.pageControl.frame = CGRectMake(0, height - kPageControlHeight, width, kPageControlHeight);
 }
 
 #pragma mark - UIScrollview 代理方法
@@ -243,14 +273,19 @@
     self.property = self.setupBlock().allValues.firstObject;
     // 添加自定义view
     self.customView = [[NSClassFromString(self.customViewClass) alloc] init];
-    [self addSubview:self.customView];
+    if(self.customView) {
+        self.customView.userInteractionEnabled = NO;
+        [self addSubview:self.customView];
+    }
 }
 
 - (void)setObj:(id)obj {
     _obj = obj;
-    NSString *set = [NSString stringWithFormat:@"set%@:",[self.property capitalizedString]];
+    NSString *set = [NSString stringWithFormat:@"set%@:", [self.property capitalizedString]];
     SEL sel = NSSelectorFromString(set);
-    ((void (*)(id,SEL,id))objc_msgSend)((id)self.customView, sel,obj);
+    if([self.customView respondsToSelector:sel]) {
+        ((void (*)(id,SEL,id))objc_msgSend)((id)self.customView, sel,obj);
+    }
 }
 
 - (void)layoutSubviews {

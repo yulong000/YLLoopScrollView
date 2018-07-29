@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0022E39A210DC307008D7101 /* YLCustomView.m in Sources */ = {isa = PBXBuildFile; fileRef = 0022E399210DC307008D7101 /* YLCustomView.m */; };
 		0034C3A61C3048110087DB48 /* MKAnnotationView+WebCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 0034C38A1C3048110087DB48 /* MKAnnotationView+WebCache.m */; };
 		0034C3A71C3048110087DB48 /* NSData+ImageContentType.m in Sources */ = {isa = PBXBuildFile; fileRef = 0034C38C1C3048110087DB48 /* NSData+ImageContentType.m */; };
 		0034C3A81C3048110087DB48 /* SDImageCache.m in Sources */ = {isa = PBXBuildFile; fileRef = 0034C38E1C3048110087DB48 /* SDImageCache.m */; };
@@ -54,6 +55,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		0022E398210DC307008D7101 /* YLCustomView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = YLCustomView.h; sourceTree = "<group>"; };
+		0022E399210DC307008D7101 /* YLCustomView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = YLCustomView.m; sourceTree = "<group>"; };
 		0034C3891C3048110087DB48 /* MKAnnotationView+WebCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "MKAnnotationView+WebCache.h"; sourceTree = "<group>"; };
 		0034C38A1C3048110087DB48 /* MKAnnotationView+WebCache.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "MKAnnotationView+WebCache.m"; sourceTree = "<group>"; };
 		0034C38B1C3048110087DB48 /* NSData+ImageContentType.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+ImageContentType.h"; sourceTree = "<group>"; };
@@ -195,6 +198,8 @@
 				397E7B2D1BFC6DC200EA1D8D /* AppDelegate.m */,
 				397E7B2F1BFC6DC200EA1D8D /* ViewController.h */,
 				397E7B301BFC6DC200EA1D8D /* ViewController.m */,
+				0022E398210DC307008D7101 /* YLCustomView.h */,
+				0022E399210DC307008D7101 /* YLCustomView.m */,
 				397E7BCA1BFEEEDF00EA1D8D /* 1.jpg */,
 				397E7BCB1BFEEEDF00EA1D8D /* 2.jpg */,
 				397E7BCC1BFEEEDF00EA1D8D /* 3.jpg */,
@@ -396,6 +401,7 @@
 				0034C3A71C3048110087DB48 /* NSData+ImageContentType.m in Sources */,
 				397E7B2B1BFC6DC200EA1D8D /* main.m in Sources */,
 				0034C3A61C3048110087DB48 /* MKAnnotationView+WebCache.m in Sources */,
+				0022E39A210DC307008D7101 /* YLCustomView.m in Sources */,
 				0034C3A81C3048110087DB48 /* SDImageCache.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

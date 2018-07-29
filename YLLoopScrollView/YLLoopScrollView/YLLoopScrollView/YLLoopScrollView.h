@@ -18,11 +18,20 @@ typedef NSDictionary * (^YLLoopScrollViewSetupBlock)(void);
 
 @interface YLLoopScrollView : UIView
 
+/**  数据源,对应customView的数据  */
+@property (nonatomic, strong) NSArray *dataSourceArr;
+
 /**  点击回调, 返回点击的 index  */
 @property (nonatomic, copy)   YLLoopScrollViewClickedBlock clickedBlock;
 
-/**  数据源,对应customView的数据  */
-@property (nonatomic, strong) NSArray *dataSourceArr;
+
+/**  页面指示器  */
+@property (nonatomic, readonly) UIPageControl *pageControl;
+/**  是否显示页面指示器, default = YES  */
+@property (nonatomic, assign) BOOL showPageControl;
+/**  pageControl 和 customView 分开显示, default = NO , showPageControl == YES 时有效 */
+@property (nonatomic, assign) BOOL showPageControlAtBottom;
+
 
 /**
  构造方法
