@@ -42,7 +42,7 @@ so easy ~~~ (具体使用方法请看demo)
 
 ### 最简单的应用
 ``` Objective-c
-NSArray *arr = @[[UIImage imageNamed:@"1.jpg"],
+    NSArray *arr = @[[UIImage imageNamed:@"1.jpg"],
                      [UIImage imageNamed:@"2.jpg"],
                      [UIImage imageNamed:@"3.jpg"],
                      [UIImage imageNamed:@"4.jpg"]];
