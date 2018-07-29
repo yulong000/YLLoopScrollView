@@ -37,6 +37,6 @@ scrollView.frame = CGRectMake(0, 0, self.view.frame.size.width, 150);
 [self.view addSubview:scrollView];
 ```
 
-so easy ~~~ \<br> (具体使用方法请看demo)
+so easy ~~~ (具体使用方法请看demo)
 ----------
 
