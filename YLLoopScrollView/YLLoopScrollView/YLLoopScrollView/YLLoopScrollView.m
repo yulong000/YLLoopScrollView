@@ -279,7 +279,9 @@
 
 - (void)setObj:(id)obj {
     _obj = obj;
-    NSString *set = [NSString stringWithFormat:@"set%@:", [self.property capitalizedString]];
+    NSString *first = [self.property substringToIndex:1];
+    NSString *other = [self.property substringFromIndex:1];
+    NSString *set = [NSString stringWithFormat:@"set%@:", [[first uppercaseString] stringByAppendingString:other]];
     SEL sel = NSSelectorFromString(set);
     if([self.customView respondsToSelector:sel]) {
         ((void (*)(id,SEL,id))objc_msgSend)((id)self.customView, sel,obj);
