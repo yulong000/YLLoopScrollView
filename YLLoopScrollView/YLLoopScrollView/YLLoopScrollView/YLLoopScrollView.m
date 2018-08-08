@@ -112,6 +112,11 @@
     [self setNeedsLayout];
 }
 
+- (void)setShowPageControlAtBottom:(BOOL)showPageControlAtBottom {
+    _showPageControlAtBottom = showPageControlAtBottom;
+    [self setNeedsLayout];
+}
+
 - (void)setCurrentIndex:(int)currentIndex {
     _currentIndex = currentIndex;
     if(self.dataSourceArr.count) {
@@ -139,22 +144,21 @@
 
 - (void)layoutSubviews {
     [super layoutSubviews];
-    
-    CGFloat width = self.frame.size.width;
-    CGFloat height = self.frame.size.height;
-    
-    self.scrollView.contentOffset = CGPointMake(width, 0);
-    self.scrollView.contentSize = CGSizeMake(width * 3, height);
-    self.scrollView.contentInset = UIEdgeInsetsZero;
+    self.pageControl.frame = CGRectMake(0, self.frame.size.height - kPageControlHeight, self.frame.size.width, kPageControlHeight);
     if(self.showPageControl && self.showPageControlAtBottom) {
-        self.scrollView.frame = CGRectMake(0, 0, width, height - kPageControlHeight);
+        self.scrollView.frame = CGRectMake(0, 0, self.frame.size.width, self.frame.size.height - kPageControlHeight);
     } else {
         self.scrollView.frame = self.bounds;
     }
+    CGFloat width = self.scrollView.frame.size.width;
+    CGFloat height = self.scrollView.frame.size.height;
+    self.scrollView.contentOffset = CGPointMake(width, 0);
+    self.scrollView.contentSize = CGSizeMake(width * 3, height);
+    self.scrollView.contentInset = UIEdgeInsetsZero;
     self.preView.frame = CGRectMake(0, 0, width, height);
     self.currentView.frame = CGRectMake(width, 0, width, height);
     self.nextView.frame = CGRectMake(width * 2, 0, width, height);
-    self.pageControl.frame = CGRectMake(0, height - kPageControlHeight, width, kPageControlHeight);
+    
 }
 
 #pragma mark - UIScrollview 代理方法
@@ -297,6 +301,13 @@
 @end
 
 @implementation YLImageView
+
+- (instancetype)initWithFrame:(CGRect)frame {
+    if (self = [super initWithFrame:frame]) {
+        self.contentMode = UIViewContentModeScaleToFill;
+    }
+    return self;
+}
 
 - (void)setUrl:(NSString *)url {
     _url = [url copy];

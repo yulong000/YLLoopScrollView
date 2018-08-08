@@ -19,11 +19,14 @@
 - (void)viewDidLoad {
     
     [super viewDidLoad];
-    NSArray *arr = @[@"http://i6.topit.me/6/5d/45/1131907198420455d6o.jpg",
-                     @"http://pic.nipic.com/2007-11-09/2007119122519868_2.jpg",
-                     @"http://pic25.nipic.com/20121209/9252150_194258033000_2.jpg",
-                     @"http://img.taopic.com/uploads/allimg/130501/240451-13050106450911.jpg",
-                     @"http://down.tutu001.com/d/file/20101129/2f5ca0f1c9b6d02ea87df74fcc_560.jpg"];
+    
+    
+    //-------------------------------------------- 样式1 --------------------------------------------//
+    NSArray *arr = @[@"http://imgsrc.baidu.com/imgad/pic/item/7c1ed21b0ef41bd595ff4fdf5ada81cb39db3d68.jpg",
+                     @"http://www.qqma.com/imgpic2/cpimagenew/2018/4/5/6e1de60ce43d4bf4b9671d7661024e7a.jpg",
+                     @"http://img.zcool.cn/community/011a5859ac137ea8012028a92fc78a.jpg@1280w_1l_2o_100sh.jpg",
+                     @"http://img05.tooopen.com/images/20150820/tooopen_sy_139205349641.jpg",
+                     @"http://img.zcool.cn/community/01c60259ac0f91a801211d25904e1f.jpg@1280w_1l_2o_100sh.jpg"];
     
     YLLoopScrollView *scrollView = [YLLoopScrollView loopScrollViewWithTimer:3 customView:nil];
     scrollView.clickedBlock = ^(NSInteger index) {
@@ -40,6 +43,8 @@
     scrollView.dataSourceArr = arr;
     [self.view addSubview:scrollView];
     
+    
+    //-------------------------------------------- 样式2 --------------------------------------------//
     YLCustomViewModel *model1 = [self modelWithImage:@"1.jpg" title:@"图片1"];
     YLCustomViewModel *model2 = [self modelWithImage:@"2.jpg" title:@"图片2"];
     YLCustomViewModel *model3 = [self modelWithImage:@"3.jpg" title:@"图片3"];
