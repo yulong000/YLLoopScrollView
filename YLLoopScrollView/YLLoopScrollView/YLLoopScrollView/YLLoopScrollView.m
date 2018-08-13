@@ -139,6 +139,11 @@
         if(self.timer) {
             [self.timer fire];
         }
+    } else {
+        if(self.timer) {
+            [self.timer invalidate];
+        }
+        self.currentView.obj = self.preView.obj = self.nextView.obj = nil;
     }
 }
 
@@ -158,7 +163,6 @@
     self.preView.frame = CGRectMake(0, 0, width, height);
     self.currentView.frame = CGRectMake(width, 0, width, height);
     self.nextView.frame = CGRectMake(width * 2, 0, width, height);
-    
 }
 
 #pragma mark - UIScrollview 代理方法
@@ -180,6 +184,7 @@
 
 #pragma mark 重新布局
 - (void)refreshScrollViewLayout {
+    if(self.dataSourceArr.count == 0)   return;
     CGFloat width = self.frame.size.width;
     CGFloat height = self.frame.size.height;
     
@@ -282,13 +287,21 @@
 }
 
 - (void)setObj:(id)obj {
-    _obj = obj;
-    NSString *first = [self.property substringToIndex:1];
-    NSString *other = [self.property substringFromIndex:1];
-    NSString *set = [NSString stringWithFormat:@"set%@:", [[first uppercaseString] stringByAppendingString:other]];
-    SEL sel = NSSelectorFromString(set);
-    if([self.customView respondsToSelector:sel]) {
-        ((void (*)(id,SEL,id))objc_msgSend)((id)self.customView, sel,obj);
+    if(obj) {
+        _obj = obj;
+        if(self.customView.superview == nil) {
+            [self addSubview:self.customView];
+            [self setNeedsLayout];
+        }
+        NSString *first = [self.property substringToIndex:1];
+        NSString *other = [self.property substringFromIndex:1];
+        NSString *set = [NSString stringWithFormat:@"set%@:", [[first uppercaseString] stringByAppendingString:other]];
+        SEL sel = NSSelectorFromString(set);
+        if([self.customView respondsToSelector:sel]) {
+            ((void (*)(id,SEL,id))objc_msgSend)((id)self.customView, sel,obj);
+        }
+    } else {
+        [self.customView removeFromSuperview];
     }
 }
 
