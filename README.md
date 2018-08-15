@@ -1,10 +1,8 @@
-### 支持pod  
-```Objective-c
-pod 'YLLoopScrollView'
-```
 
 # YLLoopScrollView
 ### 无限轮播, 可以是图片, 可以是任意的自定义view
+----------
+支持pod : pod 'YLLoopScrollView'
 
 ### 使用教程:
 -------
