@@ -8,9 +8,9 @@ Pod::Spec.new do |s|
                    DESC
   s.homepage     = "https://github.com/yulong000/YLLoopScrollView"
   s.license      = "MIT"
-  s.author             = { "weiyulong" => "weiyulong1987@163.com" }
+  s.author       = { "weiyulong" => "weiyulong1987@163.com" }
   s.platform     = :ios, "8.0"
-  s.source       = { :git => "https://github.com/yulong000/YLLoopScrollView.git", :tag => "1.0.1" }
-  s.source_files  = "YLLoopScrollView", "YLLoopScrollView/YLLoopScrollView/YLLoopScrollView/*.{h,m}"
+  s.source       = { :git => "https://github.com/yulong000/YLLoopScrollView.git", :tag => s.version }
+  s.source_files = "YLLoopScrollView/YLLoopScrollView/YLLoopScrollView/*.{h,m}"
 
 end
