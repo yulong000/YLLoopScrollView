@@ -74,6 +74,7 @@
         self.scrollView.bounces = NO;
         self.scrollView.showsHorizontalScrollIndicator = NO;
         self.scrollView.showsVerticalScrollIndicator = NO;
+        self.scrollView.contentInset = UIEdgeInsetsZero;
         [self addSubview:self.scrollView];
         
         self.preView = [[YLLoopView alloc] init];
@@ -124,24 +125,38 @@
     }
 }
 
+- (void)setLoopScrollWhenSingle:(BOOL)loopScrollWhenSingle {
+    _loopScrollWhenSingle = loopScrollWhenSingle;
+    self.dataSourceArr = self.dataSourceArr;
+    [self setNeedsLayout];
+}
+
 - (void)setDataSourceArr:(NSArray *)dataSourceArr {
     _dataSourceArr = dataSourceArr;
     self.currentIndex = 0;
     if(dataSourceArr.count) {
-        self.pageControl.numberOfPages = dataSourceArr.count;
-        self.currentView.obj = dataSourceArr.firstObject;
-        self.preView.obj = dataSourceArr.lastObject;
-        if(dataSourceArr.count > 1) {
-            self.nextView.obj = dataSourceArr[1];
+        if(self.loopScrollWhenSingle == NO && dataSourceArr.count == 1) {
+            if(self.timer) {
+                [self.timer invalidate];
+                self.timer = nil;
+            }
+            self.currentView.obj = dataSourceArr.firstObject;
+            self.pageControl.hidden = YES;
         } else {
-            self.nextView.obj = dataSourceArr.firstObject;
-        }
-        if(self.timer) {
-            [self.timer fire];
+            self.pageControl.hidden = NO;
+            self.pageControl.numberOfPages = dataSourceArr.count;
+            self.currentView.obj = dataSourceArr.firstObject;
+            self.preView.obj = dataSourceArr.lastObject;
+            if(dataSourceArr.count > 1) {
+                self.nextView.obj = dataSourceArr[1];
+            } else {
+                self.nextView.obj = dataSourceArr.firstObject;
+            }
         }
     } else {
         if(self.timer) {
             [self.timer invalidate];
+            self.timer = nil;
         }
         self.currentView.obj = self.preView.obj = self.nextView.obj = nil;
     }
@@ -157,12 +172,19 @@
     }
     CGFloat width = self.scrollView.frame.size.width;
     CGFloat height = self.scrollView.frame.size.height;
-    self.scrollView.contentOffset = CGPointMake(width, 0);
-    self.scrollView.contentSize = CGSizeMake(width * 3, height);
-    self.scrollView.contentInset = UIEdgeInsetsZero;
-    self.preView.frame = CGRectMake(0, 0, width, height);
-    self.currentView.frame = CGRectMake(width, 0, width, height);
-    self.nextView.frame = CGRectMake(width * 2, 0, width, height);
+    if(self.loopScrollWhenSingle == NO && self.dataSourceArr.count <= 1) {
+        self.preView.hidden = self.nextView.hidden = YES;
+        self.scrollView.contentSize = CGSizeMake(width, height);
+        self.scrollView.contentOffset = CGPointZero;
+        self.currentView.frame = self.scrollView.bounds;
+    } else {
+        self.preView.hidden = self.nextView.hidden = NO;
+        self.scrollView.contentOffset = CGPointMake(width, 0);
+        self.scrollView.contentSize = CGSizeMake(width * 3, height);
+        self.preView.frame = CGRectMake(0, 0, width, height);
+        self.currentView.frame = CGRectMake(width, 0, width, height);
+        self.nextView.frame = CGRectMake(width * 2, 0, width, height);
+    }
 }
 
 #pragma mark - UIScrollview 代理方法

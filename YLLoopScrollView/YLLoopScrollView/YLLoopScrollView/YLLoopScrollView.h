@@ -34,6 +34,8 @@ typedef NSDictionary * (^YLLoopScrollViewSetupBlock)(void);
 @property (nonatomic, assign) BOOL showPageControl;
 /**  pageControl 和 customView 分开显示, default = NO , showPageControl == YES 时有效 */
 @property (nonatomic, assign) BOOL showPageControlAtBottom;
+/**  只有一条数据时是否滚动,默认 yes */
+@property (nonatomic, assign) BOOL loopScrollWhenSingle;
 
 
 /**
