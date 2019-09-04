@@ -1,10 +1,10 @@
 Pod::Spec.new do |s|
 
   s.name         = "YLLoopScrollView"
-  s.version      = "1.0.1"
+  s.version      = "1.1.0"
   s.summary      = "轮播"
   s.description  = <<-DESC
-                    轮播,可以在项目里多出调用, 只需要自定义需要轮播的view就可以了
+                    轮播,可以在项目里多处调用, 只需要自定义需要轮播的view就可以了
                    DESC
   s.homepage     = "https://github.com/yulong000/YLLoopScrollView"
   s.license      = "MIT"
