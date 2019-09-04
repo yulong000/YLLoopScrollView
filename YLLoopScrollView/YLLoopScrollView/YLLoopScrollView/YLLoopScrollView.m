@@ -188,6 +188,11 @@
 }
 
 #pragma mark - UIScrollview 代理方法
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView {
+    if(self.didScrollBlock) {
+        self.didScrollBlock(scrollView);
+    }
+}
 #pragma mark 将要开始手动拖拽，停止计时器
 - (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView {
     [self.timer setFireDate:[NSDate distantFuture]];
@@ -198,10 +203,16 @@
     if(self.timer) {
         [self.timer setFireDate:[NSDate dateWithTimeIntervalSinceNow:self.t]];
     }
+    if(self.didEndScrollBlock) {
+        self.didEndScrollBlock(scrollView);
+    }
 }
 #pragma mark 已经停止滑动
 - (void)scrollViewDidEndScrollingAnimation:(UIScrollView *)scrollView {
     [self refreshScrollViewLayout];
+    if(self.didEndScrollBlock) {
+        self.didEndScrollBlock(scrollView);
+    }
 }
 
 #pragma mark 重新布局

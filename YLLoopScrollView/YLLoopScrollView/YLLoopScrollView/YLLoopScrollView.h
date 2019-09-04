@@ -10,15 +10,18 @@
 
 // 默认的pageContorl的高度
 #define kPageControlHeight 15
-@class YLLoopView;
 
-// 点击了customView返回当前点击的index
-typedef void (^YLLoopScrollViewClickedBlock)(NSInteger index);
 // 字典里 key 对应的是customView的 class名字(如:@"UIImageView"), value对应的是customView的model名字(如:@"image"), 通过重写setter方法更新显示customView
 typedef NSDictionary * (^YLLoopScrollViewSetupBlock)(void);
+// 点击了customView返回当前点击的index
+typedef void (^YLLoopScrollViewClickedBlock)(NSInteger index);
+// 滑动回调
+typedef void (^YLLoopScrollViewDidScrollBlock)(UIScrollView *scrollView);
+// 手动滑动/自动滚动结束静止后回调
+typedef void (^YLLoopScrollViewDidEndScrollBlock)(UIScrollView *scrollView);
 
 //--------------------------------  YLLoopScrollView  -------------------------------------------/
-
+@class YLLoopView;
 @interface YLLoopScrollView : UIView
 
 /**  数据源,对应customView的数据  */
@@ -27,7 +30,14 @@ typedef NSDictionary * (^YLLoopScrollViewSetupBlock)(void);
 /**  点击回调, 返回点击的 index  */
 @property (nonatomic, copy)   YLLoopScrollViewClickedBlock clickedBlock;
 
+/**  滑动回调  */
+@property (nonatomic, copy  ) YLLoopScrollViewDidScrollBlock didScrollBlock;
 
+/**  手动滑动/自动滚动结束静止后回调  */
+@property (nonatomic, copy  ) YLLoopScrollViewDidEndScrollBlock didEndScrollBlock;
+
+/**  当前页码  */
+@property (nonatomic, assign, readonly) int currentIndex;
 /**  页面指示器  */
 @property (nonatomic, readonly) UIPageControl *pageControl;
 /**  是否显示页面指示器, default = YES  */
