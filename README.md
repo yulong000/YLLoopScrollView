@@ -1,6 +1,6 @@
 
 # YLLoopScrollView
-### 无限轮播, 可以是图片, 可以是任意的自定义view
+### 无限轮播(支持纵向和横向轮播), 可以是图片, 可以是任意的自定义view
 ----------
 支持pod : pod 'YLLoopScrollView'
 

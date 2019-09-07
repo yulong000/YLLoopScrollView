@@ -92,9 +92,10 @@
         self.pageControl.userInteractionEnabled = NO;
         [self addSubview:self.pageControl];
         
-        self.currentIndex = 0;
-        self.showPageControl = YES;
-        self.showPageControlAtBottom = NO;
+        _currentIndex = 0;
+        _showPageControl = YES;
+        _showPageControlAtBottom = NO;
+        _scrollDirection = YLLoopScrollViewScrollDirectionHorizontal;
     }
     return self;
 }
@@ -148,10 +149,6 @@
     }
     if(dataSourceArr.count) {
         if(self.loopScrollWhenSingle == NO && dataSourceArr.count == 1) {
-            if(self.timer) {
-                [self.timer invalidate];
-                self.timer = nil;
-            }
             self.currentView.obj = dataSourceArr.firstObject;
             self.pageControl.hidden = YES;
         } else {
