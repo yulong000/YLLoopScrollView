@@ -45,16 +45,16 @@
     loopView.preView.setupBlock = setupBlock;
     loopView.nextView.setupBlock = setupBlock;
     loopView.currentView.setupBlock = setupBlock;
-    
-    if(time > 0) {
-        loopView.timer = [NSTimer scheduledTimerWithTimeInterval:time target:loopView selector:@selector(loop) userInfo:nil repeats:YES];
-        loopView.t = time;
-    }
+    loopView.t = time;
     return loopView;
 }
 
 - (void)loop {
-    [self.scrollView setContentOffset:CGPointMake(self.scrollView.frame.size.width * 2, 0) animated:YES];
+    if(self.scrollDirection == YLLoopScrollViewScrollDirectionHorizontal) {
+        [self.scrollView setContentOffset:CGPointMake(self.scrollView.frame.size.width * 2, 0) animated:YES];
+    } else {
+        [self.scrollView setContentOffset:CGPointMake(0, self.scrollView.frame.size.height * 2) animated:YES];
+    }
 }
 
 - (void)removeFromSuperview {
@@ -131,9 +131,21 @@
     [self setNeedsLayout];
 }
 
+- (void)setScrollDirection:(YLLoopScrollViewScrollDirection)scrollDirection {
+    _scrollDirection = scrollDirection;
+    if(scrollDirection == YLLoopScrollViewScrollDirectionVertical) {
+        self.showPageControl = NO;
+    }
+    [self setNeedsLayout];
+}
+
 - (void)setDataSourceArr:(NSArray *)dataSourceArr {
     _dataSourceArr = dataSourceArr;
     self.currentIndex = 0;
+    if(self.timer) {
+        [self.timer invalidate];
+        self.timer = nil;
+    }
     if(dataSourceArr.count) {
         if(self.loopScrollWhenSingle == NO && dataSourceArr.count == 1) {
             if(self.timer) {
@@ -152,38 +164,56 @@
             } else {
                 self.nextView.obj = dataSourceArr.firstObject;
             }
+            if(self.t > 0) {
+                self.timer = [NSTimer scheduledTimerWithTimeInterval:self.t target:self selector:@selector(loop) userInfo:nil repeats:YES];
+            }
         }
     } else {
-        if(self.timer) {
-            [self.timer invalidate];
-            self.timer = nil;
-        }
         self.currentView.obj = self.preView.obj = self.nextView.obj = nil;
     }
 }
 
 - (void)layoutSubviews {
     [super layoutSubviews];
-    self.pageControl.frame = CGRectMake(0, self.frame.size.height - kPageControlHeight, self.frame.size.width, kPageControlHeight);
-    if(self.showPageControl && self.showPageControlAtBottom) {
-        self.scrollView.frame = CGRectMake(0, 0, self.frame.size.width, self.frame.size.height - kPageControlHeight);
+    if(self.scrollDirection == YLLoopScrollViewScrollDirectionHorizontal) {
+        self.pageControl.frame = CGRectMake(0, self.frame.size.height - kPageControlHeight, self.frame.size.width, kPageControlHeight);
+        if(self.showPageControl && self.showPageControlAtBottom) {
+            self.scrollView.frame = CGRectMake(0, 0, self.frame.size.width, self.frame.size.height - kPageControlHeight);
+        } else {
+            self.scrollView.frame = self.bounds;
+        }
+        CGFloat width = self.scrollView.frame.size.width;
+        CGFloat height = self.scrollView.frame.size.height;
+        if(self.loopScrollWhenSingle == NO && self.dataSourceArr.count <= 1) {
+            self.preView.hidden = self.nextView.hidden = YES;
+            self.scrollView.contentSize = CGSizeMake(width, height);
+            self.scrollView.contentOffset = CGPointZero;
+            self.currentView.frame = self.scrollView.bounds;
+        } else {
+            self.preView.hidden = self.nextView.hidden = NO;
+            self.scrollView.contentOffset = CGPointMake(width, 0);
+            self.scrollView.contentSize = CGSizeMake(width * 3, height);
+            self.preView.frame = CGRectMake(0, 0, width, height);
+            self.currentView.frame = CGRectMake(width, 0, width, height);
+            self.nextView.frame = CGRectMake(width * 2, 0, width, height);
+        }
     } else {
         self.scrollView.frame = self.bounds;
-    }
-    CGFloat width = self.scrollView.frame.size.width;
-    CGFloat height = self.scrollView.frame.size.height;
-    if(self.loopScrollWhenSingle == NO && self.dataSourceArr.count <= 1) {
-        self.preView.hidden = self.nextView.hidden = YES;
-        self.scrollView.contentSize = CGSizeMake(width, height);
-        self.scrollView.contentOffset = CGPointZero;
-        self.currentView.frame = self.scrollView.bounds;
-    } else {
-        self.preView.hidden = self.nextView.hidden = NO;
-        self.scrollView.contentOffset = CGPointMake(width, 0);
-        self.scrollView.contentSize = CGSizeMake(width * 3, height);
-        self.preView.frame = CGRectMake(0, 0, width, height);
-        self.currentView.frame = CGRectMake(width, 0, width, height);
-        self.nextView.frame = CGRectMake(width * 2, 0, width, height);
+        CGFloat width = self.scrollView.frame.size.width;
+        CGFloat height = self.scrollView.frame.size.height;
+        if(self.loopScrollWhenSingle == NO && self.dataSourceArr.count <= 1) {
+            self.preView.hidden = self.nextView.hidden = YES;
+            self.scrollView.contentSize = CGSizeMake(width, height);
+            self.scrollView.contentOffset = CGPointZero;
+            self.currentView.frame = self.scrollView.bounds;
+        } else {
+            self.preView.hidden = self.nextView.hidden = NO;
+            self.scrollView.contentOffset = CGPointMake(0, height);
+            self.scrollView.contentSize = CGSizeMake(width, height * 3);
+            self.preView.frame = CGRectMake(0, 0, width, height);
+            self.currentView.frame = CGRectMake(0, height, width, height);
+            self.nextView.frame = CGRectMake(0, height * 2, width, height);
+        }
     }
 }
 
@@ -220,88 +250,171 @@
     if(self.dataSourceArr.count == 0)   return;
     CGFloat width = self.currentView.frame.size.width;
     CGFloat height = self.currentView.frame.size.height;
-    
-    // 向右滑动
-    if (self.scrollView.contentOffset.x == 0) {
-        // 滑动到了第一页
-        for(YLLoopView *view in self.scrollView.subviews) {
-            if(view.frame.origin.x > width * 1.5) {
-                // 最后一页 放到第一页
-                view.frame = CGRectMake(0, 0, width, height);
-                self.preView = view;
-                if(self.dataSourceArr.count == 1) {
-                    self.preView.obj = self.dataSourceArr.firstObject;
-                } else if(self.dataSourceArr.count == 2) {
-                    if(self.currentIndex == 0)  self.preView.obj = self.dataSourceArr[0];
-                    else self.preView.obj = self.dataSourceArr[1];
-                } else {
-                    if(self.currentIndex == 0){
-                        self.preView.obj = self.dataSourceArr[self.dataSourceArr.count - 2];
-                    } else if (self.currentIndex == 1) {
-                        self.preView.obj = self.dataSourceArr[self.dataSourceArr.count - 1];
-                    } else if (self.currentIndex == 2) {
+    if(self.scrollDirection == YLLoopScrollViewScrollDirectionHorizontal) {
+        // 横向滚动
+        if (self.scrollView.contentOffset.x == 0) {
+            // 向右滑动
+            // 滑动到了第一页
+            for(YLLoopView *view in self.scrollView.subviews) {
+                if(view.frame.origin.x > width * 1.5) {
+                    // 最后一页 放到第一页
+                    view.frame = CGRectMake(0, 0, width, height);
+                    self.preView = view;
+                    if(self.dataSourceArr.count == 1) {
                         self.preView.obj = self.dataSourceArr.firstObject;
+                    } else if(self.dataSourceArr.count == 2) {
+                        if(self.currentIndex == 0)  self.preView.obj = self.dataSourceArr[0];
+                        else self.preView.obj = self.dataSourceArr[1];
                     } else {
-                        self.preView.obj = self.dataSourceArr[self.currentIndex - 2];
+                        if(self.currentIndex == 0){
+                            self.preView.obj = self.dataSourceArr[self.dataSourceArr.count - 2];
+                        } else if (self.currentIndex == 1) {
+                            self.preView.obj = self.dataSourceArr[self.dataSourceArr.count - 1];
+                        } else if (self.currentIndex == 2) {
+                            self.preView.obj = self.dataSourceArr.firstObject;
+                        } else {
+                            self.preView.obj = self.dataSourceArr[self.currentIndex - 2];
+                        }
                     }
-                }
-                if(--self.currentIndex < 0) {
-                    self.currentIndex = (int)self.dataSourceArr.count - 1;
-                }
-            } else if (view.frame.origin.x < width * 0.5) {
-                // 第一页 放到第二页
-                view.frame = CGRectMake(width, 0, width, height);
-                self.currentView = view;
-            } else {
-                // 第二页放到第三页
-                view.frame = CGRectMake(width * 2, 0, width, height);
-                self.nextView = view;
-            }
-        }
-    }
-    // 向左滑动
-    else if(self.scrollView.contentOffset.x == width * 2) {
-        // 把第1组数据删掉,在最后增加一组新的
-        // 滑动到了第三页
-        for(YLLoopView *view in self.scrollView.subviews) {
-            if(view.frame.origin.x > width * 1.5) {
-                // 最后一页 放到第二页
-                view.frame = CGRectMake(width, 0, width, height);
-                self.currentView = view;
-            } else if (view.frame.origin.x < width * 0.5) {
-                // 第一页 放到第三页
-                view.frame = CGRectMake(width * 2, 0, width, height);
-                self.nextView = view;
-                if(self.dataSourceArr.count == 1) {
-                    self.nextView.obj = self.dataSourceArr.firstObject;
-                } else if(self.dataSourceArr.count == 2) {
-                    if(self.currentIndex == 0)  self.nextView.obj = self.dataSourceArr[0];
-                    else self.nextView.obj = self.dataSourceArr[1];
+                    if(--self.currentIndex < 0) {
+                        self.currentIndex = (int)self.dataSourceArr.count - 1;
+                    }
+                } else if (view.frame.origin.x < width * 0.5) {
+                    // 第一页 放到第二页
+                    view.frame = CGRectMake(width, 0, width, height);
+                    self.currentView = view;
                 } else {
-                    if(self.currentIndex == self.dataSourceArr.count - 2){
-                        self.nextView.obj = self.dataSourceArr.firstObject;
-                    } else if(self.currentIndex == self.dataSourceArr.count - 1) {
-                        self.nextView.obj = self.dataSourceArr[1];
-                    } else if (self.currentIndex == self.dataSourceArr.count - 3) {
-                        self.nextView.obj = self.dataSourceArr.lastObject;
-                    } else {
-                        self.nextView.obj = self.dataSourceArr[self.currentIndex + 2];
-                    }
+                    // 第二页放到第三页
+                    view.frame = CGRectMake(width * 2, 0, width, height);
+                    self.nextView = view;
                 }
-                if(++ self.currentIndex >= self.dataSourceArr.count) {
-                    self.currentIndex = 0;
-                }
-            } else {
-                // 第二页放到第一页
-                view.frame = CGRectMake(0, 0, width, height);
-                self.preView = view;
             }
+        } else if(self.scrollView.contentOffset.x == width * 2) {
+            // 向左滑动
+            // 把第1组数据删掉,在最后增加一组新的
+            // 滑动到了第三页
+            for(YLLoopView *view in self.scrollView.subviews) {
+                if(view.frame.origin.x > width * 1.5) {
+                    // 最后一页 放到第二页
+                    view.frame = CGRectMake(width, 0, width, height);
+                    self.currentView = view;
+                } else if (view.frame.origin.x < width * 0.5) {
+                    // 第一页 放到第三页
+                    view.frame = CGRectMake(width * 2, 0, width, height);
+                    self.nextView = view;
+                    if(self.dataSourceArr.count == 1) {
+                        self.nextView.obj = self.dataSourceArr.firstObject;
+                    } else if(self.dataSourceArr.count == 2) {
+                        if(self.currentIndex == 0)  self.nextView.obj = self.dataSourceArr[0];
+                        else self.nextView.obj = self.dataSourceArr[1];
+                    } else {
+                        if(self.currentIndex == self.dataSourceArr.count - 2){
+                            self.nextView.obj = self.dataSourceArr.firstObject;
+                        } else if(self.currentIndex == self.dataSourceArr.count - 1) {
+                            self.nextView.obj = self.dataSourceArr[1];
+                        } else if (self.currentIndex == self.dataSourceArr.count - 3) {
+                            self.nextView.obj = self.dataSourceArr.lastObject;
+                        } else {
+                            self.nextView.obj = self.dataSourceArr[self.currentIndex + 2];
+                        }
+                    }
+                    if(++ self.currentIndex >= self.dataSourceArr.count) {
+                        self.currentIndex = 0;
+                    }
+                } else {
+                    // 第二页放到第一页
+                    view.frame = CGRectMake(0, 0, width, height);
+                    self.preView = view;
+                }
+            }
+        } else {
+            return;
         }
+        // 设置偏移量，使第二页处于中间
+        self.scrollView.contentOffset = CGPointMake(self.scrollView.frame.size.width, 0);
     } else {
-        return;
+        // 纵向滑动
+        if (self.scrollView.contentOffset.y == 0) {
+            // 向下滑动
+            // 滑动到了第一页
+            for(YLLoopView *view in self.scrollView.subviews) {
+                if(view.frame.origin.y > height * 1.5) {
+                    // 最后一页 放到第一页
+                    view.frame = CGRectMake(0, 0, width, height);
+                    self.preView = view;
+                    if(self.dataSourceArr.count == 1) {
+                        self.preView.obj = self.dataSourceArr.firstObject;
+                    } else if(self.dataSourceArr.count == 2) {
+                        if(self.currentIndex == 0)  self.preView.obj = self.dataSourceArr[0];
+                        else self.preView.obj = self.dataSourceArr[1];
+                    } else {
+                        if(self.currentIndex == 0){
+                            self.preView.obj = self.dataSourceArr[self.dataSourceArr.count - 2];
+                        } else if (self.currentIndex == 1) {
+                            self.preView.obj = self.dataSourceArr[self.dataSourceArr.count - 1];
+                        } else if (self.currentIndex == 2) {
+                            self.preView.obj = self.dataSourceArr.firstObject;
+                        } else {
+                            self.preView.obj = self.dataSourceArr[self.currentIndex - 2];
+                        }
+                    }
+                    if(--self.currentIndex < 0) {
+                        self.currentIndex = (int)self.dataSourceArr.count - 1;
+                    }
+                } else if (view.frame.origin.y < height * 0.5) {
+                    // 第一页 放到第二页
+                    view.frame = CGRectMake(0, height, width, height);
+                    self.currentView = view;
+                } else {
+                    // 第二页放到第三页
+                    view.frame = CGRectMake(0, height * 2, width, height);
+                    self.nextView = view;
+                }
+            }
+        } else if(self.scrollView.contentOffset.y == height * 2) {
+            // 向上滑动
+            // 把第1组数据删掉,在最后增加一组新的
+            // 滑动到了第三页
+            for(YLLoopView *view in self.scrollView.subviews) {
+                if(view.frame.origin.y > height * 1.5) {
+                    // 最后一页 放到第二页
+                    view.frame = CGRectMake(0, height, width, height);
+                    self.currentView = view;
+                } else if (view.frame.origin.y < height * 0.5) {
+                    // 第一页 放到第三页
+                    view.frame = CGRectMake(0, height * 2, width, height);
+                    self.nextView = view;
+                    if(self.dataSourceArr.count == 1) {
+                        self.nextView.obj = self.dataSourceArr.firstObject;
+                    } else if(self.dataSourceArr.count == 2) {
+                        if(self.currentIndex == 0)  self.nextView.obj = self.dataSourceArr[0];
+                        else self.nextView.obj = self.dataSourceArr[1];
+                    } else {
+                        if(self.currentIndex == self.dataSourceArr.count - 2){
+                            self.nextView.obj = self.dataSourceArr.firstObject;
+                        } else if(self.currentIndex == self.dataSourceArr.count - 1) {
+                            self.nextView.obj = self.dataSourceArr[1];
+                        } else if (self.currentIndex == self.dataSourceArr.count - 3) {
+                            self.nextView.obj = self.dataSourceArr.lastObject;
+                        } else {
+                            self.nextView.obj = self.dataSourceArr[self.currentIndex + 2];
+                        }
+                    }
+                    if(++ self.currentIndex >= self.dataSourceArr.count) {
+                        self.currentIndex = 0;
+                    }
+                } else {
+                    // 第二页放到第一页
+                    view.frame = CGRectMake(0, 0, width, height);
+                    self.preView = view;
+                }
+            }
+        } else {
+            return;
+        }
+        // 设置偏移量，使第二页处于中间
+        self.scrollView.contentOffset = CGPointMake(0, self.scrollView.frame.size.height);
     }
-    // 设置偏移量，使第二页处于中间
-    self.scrollView.contentOffset = CGPointMake(self.scrollView.frame.size.width, 0);
 }
 @end
 

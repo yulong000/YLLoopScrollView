@@ -11,6 +11,12 @@
 // 默认的pageContorl的高度
 #define kPageControlHeight 15
 
+// 滚动的方向
+typedef NS_ENUM(NSInteger, YLLoopScrollViewScrollDirection) {
+    YLLoopScrollViewScrollDirectionHorizontal,
+    YLLoopScrollViewScrollDirectionVertical
+};
+
 // 字典里 key 对应的是customView的 class名字(如:@"UIImageView"), value对应的是customView的model名字(如:@"image"), 通过重写setter方法更新显示customView
 typedef NSDictionary * (^YLLoopScrollViewSetupBlock)(void);
 // 点击了customView返回当前点击的index
@@ -46,7 +52,8 @@ typedef void (^YLLoopScrollViewDidEndScrollBlock)(UIScrollView *scrollView);
 @property (nonatomic, assign) BOOL showPageControlAtBottom;
 /**  只有一条数据时是否滚动,默认 yes */
 @property (nonatomic, assign) BOOL loopScrollWhenSingle;
-
+/**  滚动方向,默认横向滚动,竖向滚动时会不显示pageControl  */
+@property (nonatomic, assign) YLLoopScrollViewScrollDirection scrollDirection;
 
 /**
  构造方法

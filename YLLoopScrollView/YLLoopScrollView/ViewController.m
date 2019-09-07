@@ -37,6 +37,7 @@
 //    scrollView.showPageControl = NO;
     scrollView.pageControl.currentPageIndicatorTintColor = [UIColor redColor];
     scrollView.showPageControlAtBottom = YES;
+    scrollView.scrollDirection = YLLoopScrollViewScrollDirectionVertical;
     // ------------------- //
     scrollView.frame = CGRectMake(0, 100, self.view.frame.size.width, 100);
     scrollView.dataSourceArr = arr;
