@@ -171,6 +171,7 @@
     } else {
         self.currentView.obj = self.preView.obj = self.nextView.obj = nil;
     }
+    [self setNeedsLayout];
 }
 
 - (void)layoutSubviews {
