@@ -218,8 +218,8 @@
 #pragma mark 重新布局
 - (void)refreshScrollViewLayout {
     if(self.dataSourceArr.count == 0)   return;
-    CGFloat width = self.frame.size.width;
-    CGFloat height = self.frame.size.height;
+    CGFloat width = self.currentView.frame.size.width;
+    CGFloat height = self.currentView.frame.size.height;
     
     // 向右滑动
     if (self.scrollView.contentOffset.x == 0) {
@@ -301,7 +301,7 @@
         return;
     }
     // 设置偏移量，使第二页处于中间
-    self.scrollView.contentOffset = CGPointMake(width, 0);
+    self.scrollView.contentOffset = CGPointMake(self.scrollView.frame.size.width, 0);
 }
 @end
 

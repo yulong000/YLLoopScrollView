@@ -25,7 +25,6 @@
     NSArray *arr = @[@"http://imgsrc.baidu.com/imgad/pic/item/7c1ed21b0ef41bd595ff4fdf5ada81cb39db3d68.jpg",
                      @"http://www.qqma.com/imgpic2/cpimagenew/2018/4/5/6e1de60ce43d4bf4b9671d7661024e7a.jpg",
                      @"http://img.zcool.cn/community/011a5859ac137ea8012028a92fc78a.jpg@1280w_1l_2o_100sh.jpg",
-                     @"http://img05.tooopen.com/images/20150820/tooopen_sy_139205349641.jpg",
                      @"http://img.zcool.cn/community/01c60259ac0f91a801211d25904e1f.jpg@1280w_1l_2o_100sh.jpg"];
     
     YLLoopScrollView *scrollView = [YLLoopScrollView loopScrollViewWithTimer:3 customView:nil];
