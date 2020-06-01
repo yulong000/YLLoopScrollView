@@ -13,31 +13,40 @@
 
 #### 2.调用类方法构造实例对象
 ```Objective-c
-// 传入轮播的时间(0 代表不启用定时器),需要轮播的自定义view,和需要重新赋值的model
-YLLoopScrollView *scrollView = [YLLoopScrollView loopScrollViewWithTimer:2 customView:^NSDictionary *{
+    // 传入轮播的时间(0 代表不启用定时器),需要轮播的自定义view,和需要重新赋值的model
+    YLLoopScrollView *scrollView = [YLLoopScrollView loopScrollViewWithTimer:2 customView:^NSDictionary *{
         return @{@"YLCustomView" : @"model"};
     }];
 
 ```
 #### 3.设置回调block
 ``` Objective-c
-scrollView.clickedBlock = ^(NSInteger index) {
+    scrollView.clickedBlock = ^(YLLoopScrollView *loopScrollView, NSInteger index) {
+        // 点击回调
         NSLog(@"index : %d", index);
     };
-    
+        
+    scrollView.didScrollBlock = ^(YLLoopScrollView *loopScrollView, UIScrollView *scrollView) {
+        // 滚动过程中回调
+    };
+
+    scrollView.didEndScrollBlock = ^(YLLoopScrollView *loopScrollView, UIScrollView *scrollView) {
+        // 滚动结束回调
+    };
+
 ```
 #### 4.设置数据源
 ```Objective-c
-// arr里存放的是自定义view的model
-scrollView.dataSourceArr = arr;
+    // arr里存放的是自定义view的model
+    scrollView.dataSourceArr = arr;
 ```
 #### 5.设置frame
 ```Objective-c
-scrollView.frame = CGRectMake(0, 0, self.view.frame.size.width, 150);
+    scrollView.frame = CGRectMake(0, 0, self.view.frame.size.width, 150);
 ```
 #### 6.添加到父视图
 ```Objective-c
-[self.view addSubview:scrollView];
+    [self.view addSubview:scrollView];
 ```
 
 so easy ~~~ (具体使用方法请看demo)
@@ -53,7 +62,7 @@ so easy ~~~ (具体使用方法请看demo)
         return @{@"UIImageView" : @"image"};
     }];
     scrollView.dataSourceArr = arr;
-    scrollView.clickedBlock = ^(NSInteger index) {
+    scrollView.clickedBlock = ^(YLLoopScrollView *loopScrollView, NSInteger index) {
         // todo
     };
     scrollView.frame = CGRectMake(0, 0, self.view.frame.size.width, 100);

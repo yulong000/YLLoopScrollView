@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
 
   s.name         = "YLLoopScrollView"
-  s.version      = "1.2.0"
+  s.version      = "1.3.0"
   s.summary      = "轮播"
   s.description  = <<-DESC
                     轮播,可以在项目里多处调用, 只需要自定义需要轮播的view就可以了

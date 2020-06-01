@@ -25,8 +25,9 @@
 
 @end
 
-@interface YLLoopView : UIControl
+@interface YLLoopView : UIView <UIGestureRecognizerDelegate>
 @property (nonatomic, copy)   YLLoopScrollViewSetupBlock setupBlock;
+@property (nonatomic, copy)   void (^touchBlock)(YLLoopView *loopView);
 @property (nonatomic, strong) NSString *customViewClass;
 @property (nonatomic, strong) UIView *customView;
 @property (nonatomic, copy)   NSString *property;
@@ -57,14 +58,6 @@
     }
 }
 
-- (void)removeFromSuperview {
-    [super removeFromSuperview];
-    if(self.timer) {
-        [self.timer invalidate];
-        self.timer = nil;
-    }
-}
-
 - (instancetype)initWithFrame:(CGRect)frame {
     if(self = [super initWithFrame:frame]) {
         self.scrollView = [[UIScrollView alloc] init];
@@ -80,9 +73,6 @@
         self.preView = [[YLLoopView alloc] init];
         self.currentView = [[YLLoopView alloc] init];
         self.nextView = [[YLLoopView alloc] init];
-        [self.preView addTarget:self action:@selector(loopViewClick:) forControlEvents:UIControlEventTouchUpInside];
-        [self.currentView addTarget:self action:@selector(loopViewClick:) forControlEvents:UIControlEventTouchUpInside];
-        [self.nextView addTarget:self action:@selector(loopViewClick:) forControlEvents:UIControlEventTouchUpInside];
         [self.scrollView addSubview:self.preView];
         [self.scrollView addSubview:self.currentView];
         [self.scrollView addSubview:self.nextView];
@@ -92,6 +82,23 @@
         self.pageControl.userInteractionEnabled = NO;
         [self addSubview:self.pageControl];
         
+        __weak typeof(self) weakSelf = self;
+        self.preView.touchBlock = ^(YLLoopView *loopView) {
+            if(weakSelf.clickedBlock) {
+                weakSelf.clickedBlock(weakSelf, weakSelf.currentIndex);
+            }
+        };
+        self.currentView.touchBlock = ^(YLLoopView *loopView) {
+            if(weakSelf.clickedBlock) {
+                weakSelf.clickedBlock(weakSelf, weakSelf.currentIndex);
+            }
+        };
+        self.nextView.touchBlock = ^(YLLoopView *loopView) {
+            if(weakSelf.clickedBlock) {
+                weakSelf.clickedBlock(weakSelf, weakSelf.currentIndex);
+            }
+        };
+        
         _currentIndex = 0;
         _showPageControl = YES;
         _showPageControlAtBottom = NO;
@@ -100,11 +107,18 @@
     return self;
 }
 
-- (void)loopViewClick:(YLLoopView *)loopView {
-    if(self.clickedBlock) {
-        self.clickedBlock(self.currentIndex);
+- (void)removeFromSuperview {
+    [super removeFromSuperview];
+    if(self.timer) {
+        [self.timer invalidate];
+        self.timer = nil;
     }
 }
+
+- (id)currentCustomView {
+    return self.currentView.subviews.firstObject;
+}
+
 - (void)setShowPageControl:(BOOL)showPageControl {
     _showPageControl = showPageControl;
     if(showPageControl == NO) {
@@ -169,6 +183,10 @@
         self.currentView.obj = self.preView.obj = self.nextView.obj = nil;
     }
     [self setNeedsLayout];
+    [self layoutIfNeeded];
+    if(self.didEndScrollBlock) {
+        self.didEndScrollBlock(self, self.scrollView);
+    }
 }
 
 - (void)layoutSubviews {
@@ -218,7 +236,7 @@
 #pragma mark - UIScrollview 代理方法
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView {
     if(self.didScrollBlock) {
-        self.didScrollBlock(scrollView);
+        self.didScrollBlock(self, scrollView);
     }
 }
 #pragma mark 将要开始手动拖拽，停止计时器
@@ -232,14 +250,14 @@
         [self.timer setFireDate:[NSDate dateWithTimeIntervalSinceNow:self.t]];
     }
     if(self.didEndScrollBlock) {
-        self.didEndScrollBlock(scrollView);
+        self.didEndScrollBlock(self, scrollView);
     }
 }
 #pragma mark 已经停止滑动
 - (void)scrollViewDidEndScrollingAnimation:(UIScrollView *)scrollView {
     [self refreshScrollViewLayout];
     if(self.didEndScrollBlock) {
-        self.didEndScrollBlock(scrollView);
+        self.didEndScrollBlock(self, scrollView);
     }
 }
 
@@ -418,6 +436,15 @@
 
 @implementation YLLoopView
 
+- (instancetype)initWithFrame:(CGRect)frame {
+    if(self = [super initWithFrame:frame]) {
+        UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tap:)];
+        tap.delegate = self;
+        [self addGestureRecognizer:tap];
+    }
+    return self;
+}
+
 - (void)setSetupBlock:(YLLoopScrollViewSetupBlock)setupBlock {
     _setupBlock = [setupBlock copy];
     self.customViewClass = self.setupBlock().allKeys.firstObject;
@@ -425,7 +452,6 @@
     // 添加自定义view
     self.customView = [[NSClassFromString(self.customViewClass) alloc] init];
     if(self.customView) {
-        self.customView.userInteractionEnabled = NO;
         [self addSubview:self.customView];
     }
 }
@@ -452,6 +478,21 @@
 - (void)layoutSubviews {
     [super layoutSubviews];
     self.customView.frame = self.bounds;
+}
+
+- (void)tap:(UITapGestureRecognizer *)tap {
+    if(self.touchBlock) {
+        self.touchBlock(self);
+    }
+}
+
+- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch {
+    if([touch.view isKindOfClass:[UIControl class]] ||
+       [touch.view isKindOfClass:[UITableView class]] ||
+       [touch.view isKindOfClass:[UICollectionView class]]) {
+        return NO;
+    }
+    return YES;
 }
 
 

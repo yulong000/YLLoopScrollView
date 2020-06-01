@@ -28,7 +28,7 @@
                      @"http://img.zcool.cn/community/01c60259ac0f91a801211d25904e1f.jpg@1280w_1l_2o_100sh.jpg"];
     
     YLLoopScrollView *scrollView = [YLLoopScrollView loopScrollViewWithTimer:3 customView:nil];
-    scrollView.clickedBlock = ^(NSInteger index) {
+    scrollView.clickedBlock = ^(YLLoopScrollView *loopScrollView, NSInteger index) {
         NSString * str = arr[index];
         NSLog(@"index : %ld  url : %@", index, str);
     };
@@ -53,9 +53,18 @@
     YLLoopScrollView *scrollView1 = [YLLoopScrollView loopScrollViewWithTimer:4 customView:^NSDictionary *{
         return @{@"YLCustomView" : @"model"};
     }];
-    scrollView1.clickedBlock = ^(NSInteger index) {
+    scrollView1.clickedBlock = ^(YLLoopScrollView *loopScrollView, NSInteger index) {
         YLCustomViewModel *model = arr1[index];
         NSLog(@"index : %ld  title : %@", index, model.title);
+    };
+    scrollView1.didEndScrollBlock = ^(YLLoopScrollView *loopScrollView, UIScrollView *scrollView) {
+        YLCustomView *custom = loopScrollView.currentCustomView;
+        custom.btnClickBlock = ^(YLCustomView *customView) {
+            NSLog(@"点击了自定义view上的按钮 : %d --> 标题 : %@", loopScrollView.currentIndex, customView.model.title);
+        };
+    };
+    scrollView.didScrollBlock = ^(YLLoopScrollView *loopScrollView, UIScrollView *scrollView) {
+        
     };
     scrollView1.dataSourceArr = arr1;
     scrollView1.frame = CGRectMake(0, 300, self.view.frame.size.width, 150);

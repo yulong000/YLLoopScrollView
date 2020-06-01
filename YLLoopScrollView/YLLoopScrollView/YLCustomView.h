@@ -11,6 +11,8 @@
 @interface YLCustomView : UIView
 
 @property (nonatomic, strong) YLCustomViewModel *model;
+
+@property (nonatomic, copy)   void (^btnClickBlock)(YLCustomView *customView);
 @end
 
 

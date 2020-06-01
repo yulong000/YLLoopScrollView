@@ -10,6 +10,7 @@
 
 // 默认的pageContorl的高度
 #define kPageControlHeight 15
+@class YLLoopScrollView;
 
 // 滚动的方向
 typedef NS_ENUM(NSInteger, YLLoopScrollViewScrollDirection) {
@@ -20,11 +21,11 @@ typedef NS_ENUM(NSInteger, YLLoopScrollViewScrollDirection) {
 // 字典里 key 对应的是customView的 class名字(如:@"UIImageView"), value对应的是customView的model名字(如:@"image"), 通过重写setter方法更新显示customView
 typedef NSDictionary * (^YLLoopScrollViewSetupBlock)(void);
 // 点击了customView返回当前点击的index
-typedef void (^YLLoopScrollViewClickedBlock)(NSInteger index);
+typedef void (^YLLoopScrollViewClickedBlock)(YLLoopScrollView *loopScrollView, NSInteger index);
 // 滑动回调
-typedef void (^YLLoopScrollViewDidScrollBlock)(UIScrollView *scrollView);
+typedef void (^YLLoopScrollViewDidScrollBlock)(YLLoopScrollView *loopScrollView, UIScrollView *scrollView);
 // 手动滑动/自动滚动结束静止后回调
-typedef void (^YLLoopScrollViewDidEndScrollBlock)(UIScrollView *scrollView);
+typedef void (^YLLoopScrollViewDidEndScrollBlock)(YLLoopScrollView *loopScrollView, UIScrollView *scrollView);
 
 //--------------------------------  YLLoopScrollView  -------------------------------------------/
 @class YLLoopView;
@@ -54,6 +55,8 @@ typedef void (^YLLoopScrollViewDidEndScrollBlock)(UIScrollView *scrollView);
 @property (nonatomic, assign) BOOL loopScrollWhenSingle;
 /**  滚动方向,默认横向滚动,竖向滚动时会不显示pageControl  */
 @property (nonatomic, assign) YLLoopScrollViewScrollDirection scrollDirection;
+/**  当前显示的自定义view,  可以在 didEndScrollBlock 中获取得到当前的自定义view, 并进行其他操作 */
+@property (nonatomic, weak, readonly)   id currentCustomView;
 
 /**
  构造方法
