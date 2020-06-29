@@ -24,6 +24,8 @@ typedef NSDictionary * (^YLLoopScrollViewSetupBlock)(void);
 typedef void (^YLLoopScrollViewClickedBlock)(YLLoopScrollView *loopScrollView, NSInteger index);
 // 滑动回调
 typedef void (^YLLoopScrollViewDidScrollBlock)(YLLoopScrollView *loopScrollView, UIScrollView *scrollView);
+// 手动滑动/自动滚动将要结束静止时回调
+typedef void (^YLLoopScrollViewWillEndScrollBlock)(YLLoopScrollView *loopScrollView, UIScrollView *scrollView);
 // 手动滑动/自动滚动结束静止后回调
 typedef void (^YLLoopScrollViewDidEndScrollBlock)(YLLoopScrollView *loopScrollView, UIScrollView *scrollView);
 
@@ -39,6 +41,9 @@ typedef void (^YLLoopScrollViewDidEndScrollBlock)(YLLoopScrollView *loopScrollVi
 
 /**  滑动回调  */
 @property (nonatomic, copy  ) YLLoopScrollViewDidScrollBlock didScrollBlock;
+
+/**  手动滑动/自动滚动将要结束时回调, 处理完数据后会回调  didEndScrollBlock */
+@property (nonatomic, copy  ) YLLoopScrollViewWillEndScrollBlock willEndScrollBlock;
 
 /**  手动滑动/自动滚动结束静止后回调  */
 @property (nonatomic, copy  ) YLLoopScrollViewDidEndScrollBlock didEndScrollBlock;

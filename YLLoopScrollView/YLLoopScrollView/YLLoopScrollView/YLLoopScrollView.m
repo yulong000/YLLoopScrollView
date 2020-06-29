@@ -239,12 +239,17 @@
         self.didScrollBlock(self, scrollView);
     }
 }
+
 #pragma mark 将要开始手动拖拽，停止计时器
 - (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView {
     [self.timer setFireDate:[NSDate distantFuture]];
 }
+
 #pragma mark 拖拽结束，开启计时器
 - (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView {
+    if(self.willEndScrollBlock) {
+        self.willEndScrollBlock(self, scrollView);
+    }
     [self refreshScrollViewLayout];
     if(self.timer) {
         [self.timer setFireDate:[NSDate dateWithTimeIntervalSinceNow:self.t]];
@@ -253,8 +258,12 @@
         self.didEndScrollBlock(self, scrollView);
     }
 }
+
 #pragma mark 已经停止滑动
 - (void)scrollViewDidEndScrollingAnimation:(UIScrollView *)scrollView {
+    if(self.willEndScrollBlock) {
+        self.willEndScrollBlock(self, scrollView);
+    }
     [self refreshScrollViewLayout];
     if(self.didEndScrollBlock) {
         self.didEndScrollBlock(self, scrollView);

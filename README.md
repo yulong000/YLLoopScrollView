@@ -29,6 +29,10 @@
     scrollView.didScrollBlock = ^(YLLoopScrollView *loopScrollView, UIScrollView *scrollView) {
         // 滚动过程中回调
     };
+    
+    scrollView.willEndScrollBlock = ^(YLLoopScrollView *loopScrollView, UIScrollView *scrollView) {
+        // 滚动结束,将要更新数据时回调
+    };
 
     scrollView.didEndScrollBlock = ^(YLLoopScrollView *loopScrollView, UIScrollView *scrollView) {
         // 滚动结束回调
